@@ -18,7 +18,7 @@ pipeline {
     }
     
     tools {
-        maven 'Maven'
+        maven 'maven'
         nodejs "${NODE_VERSION}"
     }
     
