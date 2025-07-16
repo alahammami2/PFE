@@ -4,12 +4,13 @@ import { AuthService, Utilisateur } from '../../services/auth.service';
 import { ToastrService } from 'ngx-toastr';
 
 @Component({
-  selector: 'app-navbar',
+  selector: 'navbar-cmp',
   templateUrl: './navbar.component.html',
   styleUrls: ['./navbar.component.css']
 })
 export class NavbarComponent implements OnInit {
   currentUser: Utilisateur | null = null;
+  isCollapsed = true;
 
   constructor(
     private element: ElementRef,
@@ -22,6 +23,42 @@ export class NavbarComponent implements OnInit {
     this.authService.currentUser$.subscribe(user => {
       this.currentUser = user;
     });
+  }
+
+  sidebarToggle(): void {
+    // Toggle sidebar logic
+    const body = document.getElementsByTagName('body')[0];
+    if (body.classList.contains('sidebar-mini')) {
+      body.classList.remove('sidebar-mini');
+    } else {
+      body.classList.add('sidebar-mini');
+    }
+  }
+
+  collapse(): void {
+    this.isCollapsed = !this.isCollapsed;
+  }
+
+  getTitle(): string {
+    const path = this.router.url;
+    switch (path) {
+      case '/dashboard':
+        return 'Tableau de Bord';
+      case '/user':
+        return 'Profil Utilisateur';
+      case '/table':
+        return 'Liste des Utilisateurs';
+      case '/typography':
+        return 'Typographie';
+      case '/icons':
+        return 'Icônes';
+      case '/maps':
+        return 'Cartes';
+      case '/notifications':
+        return 'Notifications';
+      default:
+        return 'SprintBot';
+    }
   }
 
   logout(): void {
