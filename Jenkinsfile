@@ -11,6 +11,10 @@ pipeline {
         MAVEN_OPTS = '-Xmx1024m -Xms512m'
         NODE_VERSION = '18'
 
+        // Activation des étapes
+        BUILD_DOCKER = 'true'
+        DEPLOY_APP = 'true'
+
         // Configuration base de données
         DB_URL = 'jdbc:postgresql://postgres:5432/sprintbot_db'
         DB_USER = 'sprintbot_user'
