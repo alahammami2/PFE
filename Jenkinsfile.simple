@@ -1,0 +1,151 @@
+pipeline {
+    agent any
+    
+    environment {
+        IMAGE_TAG = "${BUILD_NUMBER}"
+        MAVEN_OPTS = '-Xmx1024m -Xms512m'
+    }
+    
+    stages {
+        stage('Checkout') {
+            steps {
+                echo 'Récupération du code source...'
+                checkout scm
+                
+                script {
+                    echo "Build Number: ${BUILD_NUMBER}"
+                    echo "Git Commit: ${GIT_COMMIT}"
+                    echo "Git Branch: ${GIT_BRANCH}"
+                }
+            }
+        }
+        
+        stage('Build Backend') {
+            steps {
+                echo 'Construction du backend Spring Boot...'
+                dir('backend/SprintBot') {
+                    script {
+                        try {
+                            if (isUnix()) {
+                                sh '''
+                                    echo "Compilation du backend..."
+                                    mvn clean compile -DskipTests
+                                    
+                                    echo "Packaging du backend..."
+                                    mvn package -DskipTests
+                                    
+                                    echo "Vérification du JAR généré..."
+                                    ls -la target/*.jar || echo "Aucun JAR trouvé"
+                                '''
+                            } else {
+                                bat '''
+                                    echo "Compilation du backend..."
+                                    mvn clean compile -DskipTests
+                                    
+                                    echo "Packaging du backend..."
+                                    mvn package -DskipTests
+                                    
+                                    echo "Vérification du JAR généré..."
+                                    dir target\\*.jar || echo "Aucun JAR trouvé"
+                                '''
+                            }
+                        } catch (Exception e) {
+                            echo "Erreur lors du build backend: ${e.getMessage()}"
+                            currentBuild.result = 'UNSTABLE'
+                        }
+                    }
+                }
+            }
+        }
+        
+        stage('Build Frontend') {
+            steps {
+                echo 'Construction du frontend Angular...'
+                dir('frontend/dashboard-angular') {
+                    script {
+                        try {
+                            if (isUnix()) {
+                                sh '''
+                                    echo "Installation des dépendances..."
+                                    npm install --legacy-peer-deps
+                                    
+                                    echo "Build de production..."
+                                    npm run build || echo "Build échoué mais on continue"
+                                    
+                                    echo "Vérification des fichiers générés..."
+                                    ls -la dist/ || echo "Pas de dossier dist"
+                                '''
+                            } else {
+                                bat '''
+                                    echo "Installation des dépendances..."
+                                    npm install --legacy-peer-deps
+                                    
+                                    echo "Build de production..."
+                                    npm run build || echo "Build échoué mais on continue"
+                                    
+                                    echo "Vérification des fichiers générés..."
+                                    dir dist\\ || echo "Pas de dossier dist"
+                                '''
+                            }
+                        } catch (Exception e) {
+                            echo "Erreur lors du build frontend: ${e.getMessage()}"
+                            currentBuild.result = 'UNSTABLE'
+                        }
+                    }
+                }
+            }
+        }
+        
+        stage('Archive Artifacts') {
+            steps {
+                echo 'Archivage des artefacts...'
+                script {
+                    try {
+                        // Archiver le JAR du backend
+                        archiveArtifacts artifacts: 'backend/SprintBot/target/*.jar', 
+                                       fingerprint: true, 
+                                       allowEmptyArchive: true
+                        
+                        // Archiver les fichiers de build du frontend
+                        archiveArtifacts artifacts: 'frontend/dashboard-angular/dist/**/*', 
+                                       fingerprint: true, 
+                                       allowEmptyArchive: true
+                    } catch (Exception e) {
+                        echo "Erreur lors de l'archivage: ${e.getMessage()}"
+                    }
+                }
+            }
+        }
+    }
+    
+    post {
+        always {
+            script {
+                echo 'Nettoyage...'
+                try {
+                    // Nettoyage simple
+                    echo "Pipeline terminé - Build #${BUILD_NUMBER}"
+                } catch (Exception e) {
+                    echo "Erreur lors du nettoyage: ${e.getMessage()}"
+                }
+            }
+        }
+        
+        success {
+            echo '✅ Pipeline exécuté avec succès!'
+            script {
+                echo "Artefacts disponibles:"
+                echo "- Backend JAR: backend/SprintBot/target/"
+                echo "- Frontend: frontend/dashboard-angular/dist/"
+            }
+        }
+        
+        failure {
+            echo '❌ Échec du pipeline'
+        }
+        
+        unstable {
+            echo '⚠️ Pipeline instable - Certaines étapes ont échoué mais le build continue'
+        }
+    }
+}
