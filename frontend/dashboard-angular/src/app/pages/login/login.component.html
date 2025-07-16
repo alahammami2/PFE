@@ -1,0 +1,62 @@
+<div class="wrapper wrapper-full-page">
+  <div class="full-page login-page" filter-color="black" data-image="./assets/img/bg/fabio-mangione.jpg">
+    <div class="content">
+      <div class="container">
+        <div class="row">
+          <div class="col-md-4 ml-auto mr-auto">
+            <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="form">
+              <div class="card card-login card-plain">
+                <div class="card-header">
+                  <div class="logo-container">
+                    <img src="./assets/img/now-logo.png" alt="">
+                  </div>
+                </div>
+                <div class="card-body">
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text">
+                        <i class="nc-icon nc-single-02"></i>
+                      </span>
+                    </div>
+                    <input type="email" 
+                           class="form-control" 
+                           placeholder="Email"
+                           formControlName="email"
+                           [class.is-invalid]="f['email'].invalid && f['email'].touched">
+                  </div>
+                  <div class="invalid-feedback" *ngIf="f['email'].invalid && f['email'].touched">
+                    Email requis et valide
+                  </div>
+
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text">
+                        <i class="nc-icon nc-key-25"></i>
+                      </span>
+                    </div>
+                    <input type="password" 
+                           class="form-control" 
+                           placeholder="Mot de passe"
+                           formControlName="motDePasse"
+                           [class.is-invalid]="f['motDePasse'].invalid && f['motDePasse'].touched">
+                  </div>
+                  <div class="invalid-feedback" *ngIf="f['motDePasse'].invalid && f['motDePasse'].touched">
+                    Mot de passe requis (min 6 caractères)
+                  </div>
+                </div>
+                <div class="card-footer text-center">
+                  <button type="submit" 
+                          class="btn btn-warning btn-round btn-lg btn-block mb-3"
+                          [disabled]="loading || loginForm.invalid">
+                    <span *ngIf="loading" class="spinner-border spinner-border-sm mr-2"></span>
+                    Se connecter
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
