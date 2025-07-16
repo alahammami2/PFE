@@ -178,16 +178,29 @@ pipeline {
                         echo 'Construction de l\'image Docker backend...'
                         dir('backend/SprintBot') {
                             script {
-                                if (isUnix()) {
-                                    sh '''
-                                        docker build -t sprintbot-backend:${IMAGE_TAG} .
-                                        docker tag sprintbot-backend:${IMAGE_TAG} sprintbot-backend:latest
-                                    '''
-                                } else {
-                                    bat '''
-                                        docker build -t sprintbot-backend:%IMAGE_TAG% .
-                                        docker tag sprintbot-backend:%IMAGE_TAG% sprintbot-backend:latest
-                                    '''
+                                try {
+                                    if (isUnix()) {
+                                        sh '''
+                                            echo "Vérification du Dockerfile backend..."
+                                            ls -la Dockerfile
+                                            echo "Construction de l'image backend..."
+                                            docker build -t sprintbot-backend:${IMAGE_TAG} .
+                                            docker tag sprintbot-backend:${IMAGE_TAG} sprintbot-backend:latest
+                                            echo "Image backend créée avec succès!"
+                                        '''
+                                    } else {
+                                        bat '''
+                                            echo "Vérification du Dockerfile backend..."
+                                            dir
+                                            echo "Construction de l'image backend..."
+                                            docker build -t sprintbot-backend:%IMAGE_TAG% .
+                                            docker tag sprintbot-backend:%IMAGE_TAG% sprintbot-backend:latest
+                                            echo "Image backend créée avec succès!"
+                                        '''
+                                    }
+                                } catch (Exception e) {
+                                    echo "Erreur lors du build backend: ${e.getMessage()}"
+                                    throw e
                                 }
                             }
                         }
@@ -199,16 +212,29 @@ pipeline {
                         echo 'Construction de l\'image Docker frontend...'
                         dir('frontend/dashboard-angular') {
                             script {
-                                if (isUnix()) {
-                                    sh '''
-                                        docker build -t sprintbot-frontend:${IMAGE_TAG} .
-                                        docker tag sprintbot-frontend:${IMAGE_TAG} sprintbot-frontend:latest
-                                    '''
-                                } else {
-                                    bat '''
-                                        docker build -t sprintbot-frontend:%IMAGE_TAG% .
-                                        docker tag sprintbot-frontend:%IMAGE_TAG% sprintbot-frontend:latest
-                                    '''
+                                try {
+                                    if (isUnix()) {
+                                        sh '''
+                                            echo "Vérification du Dockerfile frontend..."
+                                            ls -la Dockerfile
+                                            echo "Construction de l'image frontend..."
+                                            docker build -t sprintbot-frontend:${IMAGE_TAG} .
+                                            docker tag sprintbot-frontend:${IMAGE_TAG} sprintbot-frontend:latest
+                                            echo "Image frontend créée avec succès!"
+                                        '''
+                                    } else {
+                                        bat '''
+                                            echo "Vérification du Dockerfile frontend..."
+                                            dir
+                                            echo "Construction de l'image frontend..."
+                                            docker build -t sprintbot-frontend:%IMAGE_TAG% .
+                                            docker tag sprintbot-frontend:%IMAGE_TAG% sprintbot-frontend:latest
+                                            echo "Image frontend créée avec succès!"
+                                        '''
+                                    }
+                                } catch (Exception e) {
+                                    echo "Erreur lors du build frontend: ${e.getMessage()}"
+                                    throw e
                                 }
                             }
                         }
