@@ -1,0 +1,87 @@
+version: '3.8'
+
+services:
+  # Base de données PostgreSQL
+  postgres:
+    image: postgres:15-alpine
+    container_name: sprintbot-postgres
+    environment:
+      POSTGRES_DB: sprintbot_db
+      POSTGRES_USER: sprintbot_user
+      POSTGRES_PASSWORD: sprintbot_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/SprintBot/postgresql-setup.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - sprintbot-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sprintbot_user -d sprintbot_db"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Backend Spring Boot
+  backend:
+    build:
+      context: ./backend/SprintBot
+      dockerfile: Dockerfile
+    container_name: sprintbot-backend
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/sprintbot_db
+      SPRING_DATASOURCE_USERNAME: sprintbot_user
+      SPRING_DATASOURCE_PASSWORD: sprintbot_password
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - sprintbot-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # Frontend Angular
+  frontend:
+    build:
+      context: ./frontend/dashboard-angular
+      dockerfile: Dockerfile
+    container_name: sprintbot-frontend
+    environment:
+      API_URL: http://backend:8080
+    ports:
+      - "4200:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - sprintbot-network
+
+  # Nginx Reverse Proxy (optionnel)
+  nginx:
+    image: nginx:alpine
+    container_name: sprintbot-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/ssl:/etc/nginx/ssl
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - sprintbot-network
+
+volumes:
+  postgres_data:
+
+networks:
+  sprintbot-network:
+    driver: bridge

@@ -1,0 +1,210 @@
+# ===================================
+# SprintBot - Plateforme Volley-Ball
+# ===================================
+
+# ===== BACKEND (Spring Boot) =====
+backend/SprintBot/target/
+backend/SprintBot/.mvn/wrapper/maven-wrapper.jar
+backend/SprintBot/.mvn/wrapper/maven-wrapper.properties
+backend/SprintBot/mvnw
+backend/SprintBot/mvnw.cmd
+
+# Logs
+backend/SprintBot/logs/
+backend/SprintBot/*.log
+backend/SprintBot/spring.log
+
+# IDE
+backend/SprintBot/.idea/
+backend/SprintBot/.vscode/
+backend/SprintBot/*.iml
+backend/SprintBot/*.ipr
+backend/SprintBot/*.iws
+
+# OS
+.DS_Store
+Thumbs.db
+
+# ===== FRONTEND (Angular) =====
+frontend/dashboard-angular/node_modules/
+frontend/dashboard-angular/dist/
+frontend/dashboard-angular/.angular/
+frontend/dashboard-angular/tmp/
+frontend/dashboard-angular/out-tsc/
+frontend/dashboard-angular/bazel-out/
+
+# Dependencies
+frontend/dashboard-angular/npm-debug.log*
+frontend/dashboard-angular/yarn-debug.log*
+frontend/dashboard-angular/yarn-error.log*
+frontend/dashboard-angular/package-lock.json
+frontend/dashboard-angular/yarn.lock
+
+# IDE
+frontend/dashboard-angular/.idea/
+frontend/dashboard-angular/.vscode/
+frontend/dashboard-angular/*.swp
+frontend/dashboard-angular/*.swo
+
+# Misc
+frontend/dashboard-angular/.sass-cache/
+frontend/dashboard-angular/connect.lock
+frontend/dashboard-angular/coverage/
+frontend/dashboard-angular/libpeerconnection.log
+frontend/dashboard-angular/testem.log
+frontend/dashboard-angular/typings/
+
+# e2e
+frontend/dashboard-angular/e2e/*.js
+frontend/dashboard-angular/e2e/*.map
+
+# ===== DOCKER =====
+# Volumes de données
+postgres_data/
+jenkins_home/
+
+# Logs Docker
+docker-compose.override.yml
+.env.local
+.env.production
+
+# ===== JENKINS =====
+# Données Jenkins (si local)
+jenkins_data/
+.jenkins/
+
+# ===== CONFIGURATION SENSIBLE =====
+# Variables d'environnement
+.env
+.env.local
+.env.production
+.env.staging
+
+# Secrets
+secrets/
+*.key
+*.pem
+*.p12
+*.jks
+
+# Base de données locale
+*.db
+*.sqlite
+*.sqlite3
+
+# ===== LOGS ET TEMPORAIRES =====
+logs/
+*.log
+*.tmp
+*.temp
+temp/
+tmp/
+
+# ===== SYSTÈME =====
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+
+# Linux
+*~
+.nfs*
+
+# ===== IDE ET ÉDITEURS =====
+# IntelliJ IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+out/
+
+# Visual Studio Code
+.vscode/
+*.code-workspace
+
+# Eclipse
+.metadata
+.recommenders/
+.project
+.classpath
+.settings/
+bin/
+
+# NetBeans
+nbproject/private/
+build/
+nbbuild/
+nbdist/
+.nb-gradle/
+
+# ===== OUTILS DE BUILD =====
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# Gradle
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# ===== SÉCURITÉ =====
+# Certificats SSL
+*.crt
+*.csr
+*.key
+*.pem
+ssl/
+
+# Mots de passe et tokens
+passwords.txt
+tokens.txt
+credentials.json
+
+# ===== MONITORING =====
+# Métriques et monitoring
+metrics/
+monitoring/
+grafana/data/
+prometheus/data/
+
+# ===== BACKUP =====
+backup/
+*.backup
+*.bak
+*.old
+
+# ===== DOCUMENTATION GÉNÉRÉE =====
+docs/generated/
+javadoc/
+typedoc/
+
+# ===== TESTS =====
+# Rapports de tests
+test-results/
+coverage/
+.nyc_output/
+junit.xml
+
+# ===== CACHE =====
+.cache/
+.npm/
+.yarn/
+.pnpm-store/
