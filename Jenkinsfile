@@ -27,13 +27,12 @@ pipeline {
             steps {
                 echo 'Récupération du code source...'
                 checkout scm
-                
-                // Afficher les informations de build
-                sh '''
+
+                script {
                     echo "Build Number: ${BUILD_NUMBER}"
                     echo "Git Commit: ${GIT_COMMIT}"
                     echo "Git Branch: ${GIT_BRANCH}"
-                '''
+                }
             }
         }
         
