@@ -18,8 +18,8 @@ pipeline {
     }
     
     tools {
-        maven 'Maven'
-        nodejs 'NodeJS'
+        maven 'maven'
+        nodejs 'node'
     }
     
     stages {
