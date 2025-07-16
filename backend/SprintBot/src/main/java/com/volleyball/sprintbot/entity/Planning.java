@@ -42,6 +42,10 @@ public class Planning {
 
     // Relations
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "equipe_id")
+    private Equipe equipe;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "coach_id")
     private Coach coach;
 

@@ -64,6 +64,10 @@ public class DemandeAdministrative {
     @JoinColumn(name = "responsable_financier_id")
     private ResponsableFinancier responsableFinancier;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "administrateur_id")
+    private Administrateur administrateur;
+
     // Constructeurs
     public DemandeAdministrative() {
         this.dateSoumission = LocalDate.now();
@@ -137,5 +141,17 @@ public class DemandeAdministrative {
 
     public Administrateur getAdministrateur() { return administrateur; }
     public void setAdministrateur(Administrateur administrateur) { this.administrateur = administrateur; }
+
+    public Joueur getJoueur() { return joueur; }
+    public void setJoueur(Joueur joueur) { this.joueur = joueur; }
+
+    public Coach getCoach() { return coach; }
+    public void setCoach(Coach coach) { this.coach = coach; }
+
+    public StaffMedical getStaffMedical() { return staffMedical; }
+    public void setStaffMedical(StaffMedical staffMedical) { this.staffMedical = staffMedical; }
+
+    public ResponsableFinancier getResponsableFinancier() { return responsableFinancier; }
+    public void setResponsableFinancier(ResponsableFinancier responsableFinancier) { this.responsableFinancier = responsableFinancier; }
 }
 

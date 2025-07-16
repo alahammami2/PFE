@@ -27,6 +27,9 @@ public class RendezVous {
     @Column(name = "id_joueur", length = 100)
     private String idJoueur;
 
+    @Column(name = "statut", length = 50)
+    private String statut = "EN_ATTENTE";
+
     // Relations
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "staff_medical_id")
@@ -100,5 +103,8 @@ public class RendezVous {
 
     public Joueur getJoueur() { return joueur; }
     public void setJoueur(Joueur joueur) { this.joueur = joueur; }
+
+    public String getStatut() { return statut; }
+    public void setStatut(String statut) { this.statut = statut; }
 }
 

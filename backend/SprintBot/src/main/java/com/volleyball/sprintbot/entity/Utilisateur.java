@@ -43,6 +43,19 @@ public abstract class Utilisateur {
     @Column(name = "telephone", length = 20)
     private String telephone;
 
+    @Column(name = "date_creation")
+    private LocalDateTime dateCreation;
+
+    @Column(name = "derniere_connexion")
+    private LocalDateTime derniereConnexion;
+
+    @Column(name = "actif")
+    private Boolean actif = true;
+
+    @Size(max = 50)
+    @Column(name = "role", length = 50)
+    private String role;
+
     // Relations
     @OneToMany(mappedBy = "expediteur", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Message> messagesEnvoyes = new ArrayList<>();
@@ -130,6 +143,9 @@ public abstract class Utilisateur {
 
     public List<DroitsAcces> getDroitsAcces() { return droitsAcces; }
     public void setDroitsAcces(List<DroitsAcces> droitsAcces) { this.droitsAcces = droitsAcces; }
+
+    public String getRole() { return role; }
+    public void setRole(String role) { this.role = role; }
 }
 
 

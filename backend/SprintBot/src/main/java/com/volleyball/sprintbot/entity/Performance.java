@@ -31,6 +31,10 @@ public class Performance {
 
     // Relations
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "joueur_id")
+    private Joueur joueur;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "coach_id")
     private Coach coach;
 
@@ -88,6 +92,9 @@ public class Performance {
 
     public Integer getNote() { return note; }
     public void setNote(Integer note) { this.note = note; }
+
+    public Joueur getJoueur() { return joueur; }
+    public void setJoueur(Joueur joueur) { this.joueur = joueur; }
 
     public Coach getCoach() { return coach; }
     public void setCoach(Coach coach) { this.coach = coach; }
