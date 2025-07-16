@@ -1,5 +1,5 @@
 # Étape 1: Build avec Maven
-FROM maven:3.9.6-openjdk-17-slim AS build
+FROM maven:3.9-openjdk-17 AS build
 
 # Définir le répertoire de travail
 WORKDIR /app
