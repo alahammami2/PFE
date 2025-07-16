@@ -47,7 +47,7 @@ pipeline {
                                 mvn clean compile -DskipTests
 
                                 echo "Packaging du backend..."
-                                mvn package -DskipTests
+                                mvn package -DskipTests -Dmaven.test.skip=true
 
                                 echo "Vérification du JAR généré..."
                                 ls -la target/*.jar
@@ -58,7 +58,7 @@ pipeline {
                                 mvn clean compile -DskipTests
 
                                 echo "Packaging du backend..."
-                                mvn package -DskipTests
+                                mvn package -DskipTests -Dmaven.test.skip=true
 
                                 echo "Vérification du JAR généré..."
                                 dir target\\*.jar

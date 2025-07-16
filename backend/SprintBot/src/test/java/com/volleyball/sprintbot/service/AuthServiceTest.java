@@ -1,6 +1,7 @@
 package com.volleyball.sprintbot.service;
 
 import com.volleyball.sprintbot.entity.Utilisateur;
+import com.volleyball.sprintbot.entity.Joueur;
 import com.volleyball.sprintbot.repository.UtilisateurRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,7 +32,7 @@ class AuthServiceTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
         
-        utilisateur = new Utilisateur();
+        utilisateur = new Joueur();
         utilisateur.setId(1L);
         utilisateur.setEmail("test@example.com");
         utilisateur.setMotDePasse("hashedPassword");
