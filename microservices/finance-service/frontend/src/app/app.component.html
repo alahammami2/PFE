@@ -1,0 +1,155 @@
+<!-- Layout principal avec sidenav -->
+<mat-sidenav-container class="sidenav-container" fullscreen>
+  
+  <!-- Sidenav (menu latéral) -->
+  <mat-sidenav 
+    #drawer 
+    class="sidenav" 
+    fixedInViewport
+    [attr.role]="isHandset ? 'dialog' : 'navigation'"
+    [mode]="isHandset ? 'over' : 'side'"
+    [opened]="sidenavOpened">
+    
+    <!-- Header du sidenav -->
+    <div class="sidenav-header">
+      <div class="logo-container">
+        <mat-icon class="logo-icon">account_balance</mat-icon>
+        <h2 class="logo-text">Finance</h2>
+      </div>
+      <div class="user-info" *ngIf="currentUser">
+        <div class="user-avatar">
+          <mat-icon>person</mat-icon>
+        </div>
+        <div class="user-details">
+          <div class="user-name">{{ currentUser.prenom }} {{ currentUser.nom }}</div>
+          <div class="user-role">Gestionnaire Finance</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation menu -->
+    <mat-nav-list class="nav-list">
+      <ng-container *ngFor="let item of menuItems">
+        <mat-list-item 
+          *ngIf="hasAccess(item)"
+          class="nav-item"
+          [class.active]="isMenuActive(item.route)"
+          (click)="navigateTo(item.route)">
+          <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
+          <span matListItemTitle>{{ item.label }}</span>
+          <mat-icon 
+            matListItemMeta 
+            *ngIf="isMenuActive(item.route)"
+            class="active-indicator">
+            chevron_right
+          </mat-icon>
+        </mat-list-item>
+      </ng-container>
+    </mat-nav-list>
+
+    <!-- Footer du sidenav -->
+    <div class="sidenav-footer">
+      <mat-list-item (click)="logout()" class="logout-item">
+        <mat-icon matListItemIcon>logout</mat-icon>
+        <span matListItemTitle>Déconnexion</span>
+      </mat-list-item>
+    </div>
+  </mat-sidenav>
+
+  <!-- Contenu principal -->
+  <mat-sidenav-content class="main-content">
+    
+    <!-- Toolbar -->
+    <mat-toolbar class="toolbar" color="primary">
+      <button
+        type="button"
+        aria-label="Toggle sidenav"
+        mat-icon-button
+        (click)="toggleSidenav()">
+        <mat-icon aria-label="Side nav toggle icon">menu</mat-icon>
+      </button>
+      
+      <div class="toolbar-title">
+        <mat-icon class="page-icon">{{ getPageIcon() }}</mat-icon>
+        <span class="page-title">{{ getPageTitle() }}</span>
+      </div>
+      
+      <div class="toolbar-spacer"></div>
+      
+      <!-- Actions de la toolbar -->
+      <div class="toolbar-actions">
+        <button mat-icon-button [matMenuTriggerFor]="notificationMenu" matTooltip="Notifications">
+          <mat-icon matBadge="3" matBadgeColor="warn">notifications</mat-icon>
+        </button>
+        
+        <button mat-icon-button [matMenuTriggerFor]="userMenu" matTooltip="Profil utilisateur">
+          <mat-icon>account_circle</mat-icon>
+        </button>
+      </div>
+    </mat-toolbar>
+
+    <!-- Menu des notifications -->
+    <mat-menu #notificationMenu="matMenu" class="notification-menu">
+      <div class="menu-header">
+        <span>Notifications</span>
+        <button mat-icon-button>
+          <mat-icon>settings</mat-icon>
+        </button>
+      </div>
+      <mat-divider></mat-divider>
+      <button mat-menu-item>
+        <mat-icon>warning</mat-icon>
+        <span>Budget "Équipement" à 85% d'utilisation</span>
+      </button>
+      <button mat-menu-item>
+        <mat-icon>schedule</mat-icon>
+        <span>3 transactions en attente de validation</span>
+      </button>
+      <button mat-menu-item>
+        <mat-icon>event</mat-icon>
+        <span>Contrat sponsor expire dans 30 jours</span>
+      </button>
+      <mat-divider></mat-divider>
+      <button mat-menu-item class="view-all">
+        <span>Voir toutes les notifications</span>
+      </button>
+    </mat-menu>
+
+    <!-- Menu utilisateur -->
+    <mat-menu #userMenu="matMenu" class="user-menu">
+      <div class="menu-header">
+        <div class="user-info-menu">
+          <div class="user-name">{{ currentUser?.prenom }} {{ currentUser?.nom }}</div>
+          <div class="user-email">{{ currentUser?.email }}</div>
+        </div>
+      </div>
+      <mat-divider></mat-divider>
+      <button mat-menu-item>
+        <mat-icon>person</mat-icon>
+        <span>Mon profil</span>
+      </button>
+      <button mat-menu-item>
+        <mat-icon>settings</mat-icon>
+        <span>Paramètres</span>
+      </button>
+      <button mat-menu-item>
+        <mat-icon>help</mat-icon>
+        <span>Aide</span>
+      </button>
+      <mat-divider></mat-divider>
+      <button mat-menu-item (click)="logout()">
+        <mat-icon>logout</mat-icon>
+        <span>Déconnexion</span>
+      </button>
+    </mat-menu>
+
+    <!-- Contenu des pages -->
+    <div class="page-content">
+      <router-outlet></router-outlet>
+    </div>
+
+  </mat-sidenav-content>
+</mat-sidenav-container>
+
+<!-- Loading global -->
+<ngx-loading></ngx-loading>

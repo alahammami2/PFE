@@ -1,0 +1,352 @@
+/* Styles globaux pour l'application SprintBot Finance */
+
+// Import des thèmes Angular Material
+@import '~@angular/material/theming';
+
+// Configuration du thème personnalisé
+@include mat-core();
+
+// Définition des palettes de couleurs
+$finance-primary: mat-palette($mat-blue, 700);
+$finance-accent: mat-palette($mat-orange, 500);
+$finance-warn: mat-palette($mat-red, 500);
+
+// Création du thème
+$finance-theme: mat-light-theme((
+  color: (
+    primary: $finance-primary,
+    accent: $finance-accent,
+    warn: $finance-warn,
+  )
+));
+
+// Application du thème
+@include angular-material-theme($finance-theme);
+
+// Variables CSS personnalisées
+:root {
+  --primary-color: #1976d2;
+  --accent-color: #ff9800;
+  --warn-color: #f44336;
+  --success-color: #4caf50;
+  --info-color: #2196f3;
+  --light-color: #f5f5f5;
+  --dark-color: #333333;
+  --border-color: #e0e0e0;
+  --shadow-color: rgba(0, 0, 0, 0.1);
+  
+  // Espacements
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  
+  // Rayons de bordure
+  --border-radius-sm: 4px;
+  --border-radius-md: 8px;
+  --border-radius-lg: 12px;
+  
+  // Ombres
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+// Reset et styles de base
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+  background-color: #fafafa;
+  color: #333;
+  line-height: 1.5;
+}
+
+// Styles pour les liens
+a {
+  color: var(--primary-color);
+  text-decoration: none;
+  transition: color 0.3s ease;
+  
+  &:hover {
+    color: darken(#1976d2, 10%);
+    text-decoration: underline;
+  }
+}
+
+// Classes utilitaires
+.text-center { text-align: center; }
+.text-left { text-align: left; }
+.text-right { text-align: right; }
+
+.text-primary { color: var(--primary-color); }
+.text-accent { color: var(--accent-color); }
+.text-warn { color: var(--warn-color); }
+.text-success { color: var(--success-color); }
+.text-info { color: var(--info-color); }
+.text-muted { color: #666; }
+
+.bg-primary { background-color: var(--primary-color); }
+.bg-accent { background-color: var(--accent-color); }
+.bg-warn { background-color: var(--warn-color); }
+.bg-success { background-color: var(--success-color); }
+.bg-light { background-color: var(--light-color); }
+
+// Espacements
+.m-0 { margin: 0; }
+.m-1 { margin: var(--spacing-xs); }
+.m-2 { margin: var(--spacing-sm); }
+.m-3 { margin: var(--spacing-md); }
+.m-4 { margin: var(--spacing-lg); }
+.m-5 { margin: var(--spacing-xl); }
+
+.p-0 { padding: 0; }
+.p-1 { padding: var(--spacing-xs); }
+.p-2 { padding: var(--spacing-sm); }
+.p-3 { padding: var(--spacing-md); }
+.p-4 { padding: var(--spacing-lg); }
+.p-5 { padding: var(--spacing-xl); }
+
+.mt-0 { margin-top: 0; }
+.mt-1 { margin-top: var(--spacing-xs); }
+.mt-2 { margin-top: var(--spacing-sm); }
+.mt-3 { margin-top: var(--spacing-md); }
+.mt-4 { margin-top: var(--spacing-lg); }
+.mt-5 { margin-top: var(--spacing-xl); }
+
+.mb-0 { margin-bottom: 0; }
+.mb-1 { margin-bottom: var(--spacing-xs); }
+.mb-2 { margin-bottom: var(--spacing-sm); }
+.mb-3 { margin-bottom: var(--spacing-md); }
+.mb-4 { margin-bottom: var(--spacing-lg); }
+.mb-5 { margin-bottom: var(--spacing-xl); }
+
+// Flexbox
+.d-flex { display: flex; }
+.flex-column { flex-direction: column; }
+.flex-row { flex-direction: row; }
+.justify-content-center { justify-content: center; }
+.justify-content-between { justify-content: space-between; }
+.justify-content-around { justify-content: space-around; }
+.align-items-center { align-items: center; }
+.align-items-start { align-items: flex-start; }
+.align-items-end { align-items: flex-end; }
+.flex-1 { flex: 1; }
+
+// Styles pour les cartes
+.card {
+  background: white;
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-sm);
+  padding: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+  transition: box-shadow 0.3s ease;
+  
+  &:hover {
+    box-shadow: var(--shadow-md);
+  }
+  
+  .card-header {
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+    
+    h2, h3, h4 {
+      margin: 0;
+      color: var(--dark-color);
+    }
+  }
+  
+  .card-content {
+    flex: 1;
+  }
+  
+  .card-actions {
+    border-top: 1px solid var(--border-color);
+    padding-top: var(--spacing-md);
+    margin-top: var(--spacing-md);
+    display: flex;
+    gap: var(--spacing-sm);
+    justify-content: flex-end;
+  }
+}
+
+// Styles pour les tableaux
+.table-container {
+  background: white;
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  
+  .table-header {
+    background-color: var(--light-color);
+    padding: var(--spacing-md);
+    border-bottom: 1px solid var(--border-color);
+    
+    h3 {
+      margin: 0;
+      color: var(--dark-color);
+    }
+  }
+}
+
+// Styles pour les formulaires
+.form-container {
+  background: white;
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-sm);
+  padding: var(--spacing-lg);
+  
+  .form-header {
+    margin-bottom: var(--spacing-lg);
+    
+    h2 {
+      margin: 0;
+      color: var(--dark-color);
+    }
+  }
+  
+  .form-actions {
+    margin-top: var(--spacing-lg);
+    display: flex;
+    gap: var(--spacing-sm);
+    justify-content: flex-end;
+  }
+}
+
+// Styles pour les indicateurs
+.indicator {
+  display: flex;
+  align-items: center;
+  padding: var(--spacing-md);
+  background: white;
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-sm);
+  
+  .indicator-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: var(--spacing-md);
+    
+    &.success { background-color: rgba(76, 175, 80, 0.1); color: var(--success-color); }
+    &.warning { background-color: rgba(255, 152, 0, 0.1); color: var(--accent-color); }
+    &.error { background-color: rgba(244, 67, 54, 0.1); color: var(--warn-color); }
+    &.info { background-color: rgba(33, 150, 243, 0.1); color: var(--info-color); }
+  }
+  
+  .indicator-content {
+    flex: 1;
+    
+    .indicator-value {
+      font-size: 24px;
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+    
+    .indicator-label {
+      color: #666;
+      font-size: 14px;
+    }
+  }
+}
+
+// Styles pour les statuts
+.status-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  
+  &.status-active { background-color: rgba(76, 175, 80, 0.1); color: var(--success-color); }
+  &.status-inactive { background-color: rgba(158, 158, 158, 0.1); color: #666; }
+  &.status-pending { background-color: rgba(255, 152, 0, 0.1); color: var(--accent-color); }
+  &.status-error { background-color: rgba(244, 67, 54, 0.1); color: var(--warn-color); }
+}
+
+// Animations
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideIn {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.slide-in {
+  animation: slideIn 0.3s ease-out;
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .card {
+    margin: var(--spacing-sm);
+    padding: var(--spacing-sm);
+  }
+  
+  .form-container {
+    margin: var(--spacing-sm);
+    padding: var(--spacing-md);
+  }
+  
+  .indicator {
+    flex-direction: column;
+    text-align: center;
+    
+    .indicator-icon {
+      margin-right: 0;
+      margin-bottom: var(--spacing-sm);
+    }
+  }
+}
+
+// Styles pour les toasts (ngx-toastr)
+.toast-container {
+  .ngx-toastr {
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--shadow-lg);
+  }
+}
+
+// Styles pour le loading (ngx-loading)
+.ngx-loading-foreground {
+  background-color: rgba(255, 255, 255, 0.8) !important;
+}
+
+// Scrollbar personnalisée
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+  
+  &:hover {
+    background: #a8a8a8;
+  }
+}

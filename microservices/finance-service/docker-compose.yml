@@ -1,0 +1,205 @@
+version: '3.8'
+
+# Docker Compose pour le service finance
+# Inclut le backend, la base de données PostgreSQL et Redis
+
+services:
+  # Base de données PostgreSQL pour le service finance
+  finance-db:
+    image: postgres:15-alpine
+    container_name: sprintbot-finance-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: finance_db
+      POSTGRES_USER: finance_user
+      POSTGRES_PASSWORD: finance_password
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=fr_FR.UTF-8"
+      TZ: Europe/Paris
+    volumes:
+      - finance_db_data:/var/lib/postgresql/data
+      - ./backend/src/main/resources/db/init:/docker-entrypoint-initdb.d:ro
+    ports:
+      - "5435:5432"  # Port externe différent pour éviter les conflits
+    networks:
+      - finance-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U finance_user -d finance_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Redis pour le cache du service finance
+  finance-redis:
+    image: redis:7-alpine
+    container_name: sprintbot-finance-redis
+    restart: unless-stopped
+    environment:
+      TZ: Europe/Paris
+    command: >
+      redis-server 
+      --appendonly yes 
+      --appendfsync everysec
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+      --timeout 300
+      --tcp-keepalive 60
+    volumes:
+      - finance_redis_data:/data
+    ports:
+      - "6385:6379"  # Port externe différent pour éviter les conflits
+    networks:
+      - finance-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "3"
+
+  # Service finance backend
+  finance-service:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      args:
+        - BUILD_DATE=${BUILD_DATE:-$(date -u +'%Y-%m-%dT%H:%M:%SZ')}
+        - VCS_REF=${VCS_REF:-$(git rev-parse --short HEAD)}
+    image: sprintbot/finance-service:latest
+    container_name: sprintbot-finance-service
+    restart: unless-stopped
+    depends_on:
+      finance-db:
+        condition: service_healthy
+      finance-redis:
+        condition: service_healthy
+    environment:
+      # Profil Spring
+      SPRING_PROFILES_ACTIVE: docker
+      
+      # Configuration serveur
+      SERVER_PORT: 8085
+      
+      # Configuration base de données
+      DB_HOST: finance-db
+      DB_PORT: 5432
+      DB_NAME: finance_db
+      DB_USERNAME: finance_user
+      DB_PASSWORD: finance_password
+      DB_SCHEMA: finance
+      
+      # Configuration Redis
+      REDIS_HOST: finance-redis
+      REDIS_PORT: 6379
+      REDIS_DATABASE: 0
+      REDIS_TIMEOUT: 2000
+      
+      # Configuration JWT
+      JWT_SECRET: ${JWT_SECRET:-sprintbot-finance-secret-key-2024-very-long-and-secure}
+      JWT_EXPIRATION: 86400000
+      JWT_REFRESH_EXPIRATION: 604800000
+      
+      # Configuration CORS
+      CORS_ALLOWED_ORIGINS: http://localhost:4200,http://localhost:3000,https://*.sprintbot.com
+      
+      # Configuration mail
+      MAIL_HOST: ${MAIL_HOST:-smtp.gmail.com}
+      MAIL_PORT: ${MAIL_PORT:-587}
+      MAIL_USERNAME: ${MAIL_USERNAME:-noreply@sprintbot.com}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+      MAIL_FROM: ${MAIL_FROM:-noreply@sprintbot.com}
+      
+      # Configuration finance spécifique
+      FINANCE_REPORTS_PATH: /app/reports
+      FINANCE_UPLOADS_PATH: /app/uploads
+      FINANCE_BUDGET_ALERT_THRESHOLD: 80
+      FINANCE_AUTO_VALIDATION_LIMIT: 100
+      
+      # Configuration JVM
+      JAVA_OPTS: >
+        -Xms512m 
+        -Xmx1024m 
+        -XX:+UseG1GC 
+        -XX:G1HeapRegionSize=16m 
+        -XX:+UseStringDeduplication
+        -Djava.awt.headless=true
+        -Dfile.encoding=UTF-8
+        -Duser.timezone=Europe/Paris
+      
+      # Options de démarrage
+      WAIT_FOR_DB: true
+      WAIT_FOR_REDIS: true
+      
+      # Timezone
+      TZ: Europe/Paris
+    volumes:
+      - finance_logs:/app/logs
+      - finance_uploads:/app/uploads
+      - finance_reports:/app/reports
+      - finance_temp:/app/temp
+    ports:
+      - "8085:8085"
+    networks:
+      - finance-network
+      - sprintbot-network  # Réseau partagé avec les autres services
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8085/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "5"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.finance-service.rule=Host(`finance.sprintbot.local`)"
+      - "traefik.http.routers.finance-service.entrypoints=web"
+      - "traefik.http.services.finance-service.loadbalancer.server.port=8085"
+      - "com.sprintbot.service=finance"
+      - "com.sprintbot.version=1.0.0"
+
+# Volumes pour la persistance des données
+volumes:
+  finance_db_data:
+    driver: local
+    name: sprintbot_finance_db_data
+  finance_redis_data:
+    driver: local
+    name: sprintbot_finance_redis_data
+  finance_logs:
+    driver: local
+    name: sprintbot_finance_logs
+  finance_uploads:
+    driver: local
+    name: sprintbot_finance_uploads
+  finance_reports:
+    driver: local
+    name: sprintbot_finance_reports
+  finance_temp:
+    driver: local
+    name: sprintbot_finance_temp
+
+# Réseaux
+networks:
+  finance-network:
+    driver: bridge
+    name: sprintbot-finance-network
+    ipam:
+      config:
+        - subnet: 172.25.0.0/16
+  sprintbot-network:
+    external: true
+    name: sprintbot-network

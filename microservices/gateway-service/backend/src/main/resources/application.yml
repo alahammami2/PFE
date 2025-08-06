@@ -1,0 +1,319 @@
+# Configuration du Gateway Service - SprintBot
+# Point d'entrée unique pour l'écosystème microservices
+
+spring:
+  application:
+    name: gateway-service
+  
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+  
+  # Configuration Spring Cloud Gateway
+  cloud:
+    gateway:
+      # Configuration globale
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+        - AddRequestHeader=X-Gateway-Service, SprintBot-Gateway
+        - AddResponseHeader=X-Gateway-Service, SprintBot-Gateway
+      
+      # Configuration des routes (définies dans le code Java)
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+          predicates:
+            - Path=/api/{service}/**
+          filters:
+            - StripPrefix=2
+      
+      # Configuration globale CORS
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOriginPatterns: 
+              - "http://localhost:*"
+              - "https://localhost:*"
+              - "http://sprintbot.local:*"
+              - "https://sprintbot.local:*"
+              - "https://*.sprintbot.com"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - PATCH
+              - OPTIONS
+            allowedHeaders:
+              - "*"
+            allowCredentials: true
+            maxAge: 3600
+      
+      # Configuration des métriques
+      metrics:
+        enabled: true
+      
+      # Configuration du circuit breaker
+      httpclient:
+        connect-timeout: 5000
+        response-timeout: 30s
+        pool:
+          type: elastic
+          max-idle-time: 15s
+          max-life-time: 60s
+  
+  # Configuration Redis pour rate limiting
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      database: ${REDIS_DATABASE:0}
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+          max-wait: -1ms
+
+# Configuration du serveur
+server:
+  port: ${SERVER_PORT:8080}
+  servlet:
+    context-path: /
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/html,text/xml,text/plain
+  http2:
+    enabled: true
+
+# Configuration Eureka Client
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_CLIENT_SERVICE_URL:http://localhost:8761/eureka/}
+    register-with-eureka: true
+    fetch-registry: true
+    registry-fetch-interval-seconds: 30
+    instance-info-replication-interval-seconds: 30
+  instance:
+    hostname: ${GATEWAY_INSTANCE_HOSTNAME:gateway-service}
+    instance-id: ${spring.application.name}:${spring.profiles.active}:${server.port}
+    prefer-ip-address: true
+    lease-renewal-interval-in-seconds: 30
+    lease-expiration-duration-in-seconds: 90
+    metadata-map:
+      version: 1.0.0
+      description: "API Gateway pour l'écosystème SprintBot"
+      team: "Infrastructure Team"
+
+# Configuration JWT
+jwt:
+  secret: ${JWT_SECRET_KEY:SprintBot-Gateway-Secret-Key-2024-Very-Long-And-Secure}
+  expiration: ${JWT_EXPIRATION_TIME:86400000} # 24 heures
+  refresh-token:
+    expiration: ${JWT_REFRESH_EXPIRATION_TIME:604800000} # 7 jours
+
+# Configuration du rate limiting
+rate-limit:
+  requests-per-second: ${RATE_LIMIT_REQUESTS_PER_SECOND:100}
+  burst-capacity: ${RATE_LIMIT_BURST_CAPACITY:200}
+  replenish-rate: ${RATE_LIMIT_REPLENISH_RATE:100}
+
+# Configuration Resilience4j
+resilience4j:
+  circuitbreaker:
+    instances:
+      auth-user-service-cb:
+        register-health-indicator: true
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+        permitted-number-of-calls-in-half-open-state: 3
+        automatic-transition-from-open-to-half-open-enabled: true
+        wait-duration-in-open-state: 5s
+        failure-rate-threshold: 50
+        event-consumer-buffer-size: 10
+      planning-performance-service-cb:
+        register-health-indicator: true
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+        permitted-number-of-calls-in-half-open-state: 3
+        automatic-transition-from-open-to-half-open-enabled: true
+        wait-duration-in-open-state: 5s
+        failure-rate-threshold: 50
+      medical-admin-service-cb:
+        register-health-indicator: true
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+        permitted-number-of-calls-in-half-open-state: 3
+        automatic-transition-from-open-to-half-open-enabled: true
+        wait-duration-in-open-state: 5s
+        failure-rate-threshold: 50
+      communication-service-cb:
+        register-health-indicator: true
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+        permitted-number-of-calls-in-half-open-state: 3
+        automatic-transition-from-open-to-half-open-enabled: true
+        wait-duration-in-open-state: 5s
+        failure-rate-threshold: 50
+      finance-service-cb:
+        register-health-indicator: true
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+        permitted-number-of-calls-in-half-open-state: 3
+        automatic-transition-from-open-to-half-open-enabled: true
+        wait-duration-in-open-state: 5s
+        failure-rate-threshold: 50
+  
+  retry:
+    instances:
+      default:
+        max-attempts: 3
+        wait-duration: 100ms
+        exponential-backoff-multiplier: 2
+        retry-exceptions:
+          - java.net.ConnectException
+          - java.net.SocketTimeoutException
+          - org.springframework.web.client.ResourceAccessException
+
+# Configuration des logs
+logging:
+  level:
+    com.sprintbot.gateway: ${LOGGING_LEVEL_GATEWAY:INFO}
+    org.springframework.cloud.gateway: ${LOGGING_LEVEL_GATEWAY_FRAMEWORK:INFO}
+    org.springframework.security: ${LOGGING_LEVEL_SECURITY:WARN}
+    io.github.resilience4j: ${LOGGING_LEVEL_RESILIENCE4J:INFO}
+    reactor.netty: ${LOGGING_LEVEL_NETTY:WARN}
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level [%logger{36}] - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level [%logger{36}] - %msg%n"
+
+# Configuration Actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,gateway,circuitbreakers,ratelimiters
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: when-authorized
+      show-components: always
+    metrics:
+      enabled: true
+    prometheus:
+      enabled: true
+    gateway:
+      enabled: true
+  health:
+    circuitbreakers:
+      enabled: true
+    ratelimiters:
+      enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+      percentiles:
+        http.server.requests: 0.5, 0.95, 0.99
+      slo:
+        http.server.requests: 10ms, 50ms, 100ms, 200ms, 500ms
+
+# Configuration des informations de l'application
+info:
+  app:
+    name: ${spring.application.name}
+    description: "API Gateway pour l'écosystème microservices SprintBot"
+    version: 1.0.0
+    team: "Infrastructure Team"
+    contact: "infrastructure@sprintbot.com"
+  build:
+    artifact: ${project.artifactId:gateway-service}
+    name: ${project.name:SprintBot Gateway Service}
+    time: ${maven.build.timestamp:unknown}
+    version: ${project.version:1.0.0}
+  git:
+    branch: ${git.branch:unknown}
+    commit:
+      id: ${git.commit.id:unknown}
+      time: ${git.commit.time:unknown}
+
+---
+# Profil développement
+spring:
+  config:
+    activate:
+      on-profile: dev
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+logging:
+  level:
+    com.sprintbot.gateway: DEBUG
+    org.springframework.cloud.gateway: DEBUG
+    org.springframework.security: DEBUG
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+
+---
+# Profil Docker
+spring:
+  config:
+    activate:
+      on-profile: docker
+  data:
+    redis:
+      host: redis
+      port: 6379
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://discovery-service:8761/eureka/
+  instance:
+    hostname: gateway-service
+    prefer-ip-address: false
+
+---
+# Profil production
+spring:
+  config:
+    activate:
+      on-profile: prod
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+      password: ${REDIS_PASSWORD}
+      ssl: true
+      lettuce:
+        pool:
+          max-active: 20
+          max-idle: 10
+          min-idle: 5
+
+logging:
+  level:
+    com.sprintbot.gateway: WARN
+    org.springframework.cloud.gateway: WARN
+    org.springframework.security: WARN
+
+# Configuration de sécurité renforcée pour la production
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: never

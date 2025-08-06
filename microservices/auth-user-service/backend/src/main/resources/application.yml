@@ -1,0 +1,156 @@
+# Configuration du microservice auth-user-service
+spring:
+  application:
+    name: auth-user-service
+
+  # Configuration du serveur
+  server:
+    port: 8081
+
+# Configuration Eureka Client
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_CLIENT_SERVICE_URL:http://localhost:8761/eureka/}
+    register-with-eureka: true
+    fetch-registry: true
+    registry-fetch-interval-seconds: 30
+  instance:
+    hostname: ${EUREKA_INSTANCE_HOSTNAME:localhost}
+    prefer-ip-address: true
+    lease-renewal-interval-in-seconds: 30
+    lease-expiration-duration-in-seconds: 90
+    metadata-map:
+      version: "1.0.0"
+      description: "Auth User Service - Authentification et gestion des utilisateurs"
+      team: "SprintBot"
+  
+  # Configuration de la base de données
+  datasource:
+    url: jdbc:postgresql://localhost:5433/auth_user_db
+    username: auth_user
+    password: auth_user_password
+    driver-class-name: org.postgresql.Driver
+  
+  # Configuration JPA/Hibernate
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        jdbc:
+          lob:
+            non_contextual_creation: true
+  
+  # Configuration de sécurité
+  security:
+    user:
+      name: admin
+      password: admin123
+
+# Configuration JWT
+jwt:
+  secret: sprintbot-auth-secret-key-very-long-and-secure-2024-must-be-at-least-512-bits-for-hs512-algorithm-security-requirements
+  expiration: 86400000  # 24 heures en millisecondes
+  refresh-expiration: 604800000  # 7 jours en millisecondes
+
+# Configuration CORS
+cors:
+  allowed-origins: "http://localhost:4200,http://localhost:4201,http://frontend:80"
+  allowed-methods: "GET,POST,PUT,DELETE,OPTIONS"
+  allowed-headers: "*"
+  allow-credentials: true
+
+# Configuration des logs
+logging:
+  level:
+    com.sprintbot.authuser: DEBUG
+    org.springframework.security: INFO
+    org.hibernate.SQL: WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+# Configuration Actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+  health:
+    db:
+      enabled: true
+
+# Configuration spécifique au microservice
+microservice:
+  auth-user:
+    name: "Auth User Service"
+    version: "1.0.0"
+    description: "Microservice d'authentification et gestion des utilisateurs"
+    
+---
+# Profil Docker
+spring:
+  config:
+    activate:
+      on-profile: docker
+
+  datasource:
+    url: jdbc:postgresql://auth-user-db:5432/auth_user_db
+    username: auth_user
+    password: auth_user_password
+
+# Configuration JWT pour Docker
+jwt:
+  secret: sprintbot-auth-secret-key-very-long-and-secure-2024-docker-must-be-at-least-512-bits-for-hs512-algorithm-security-requirements
+  expiration: 86400000  # 24 heures en millisecondes
+  refresh-expiration: 604800000  # 7 jours en millisecondes
+
+# Configuration Eureka pour Docker
+eureka:
+  client:
+    service-url:
+      defaultZone: http://discovery-service:8761/eureka/
+  instance:
+    hostname: auth-user-service
+    prefer-ip-address: true
+
+# Configuration CORS pour Docker
+cors:
+  allowed-origins: "http://localhost:4200,http://localhost:4201,http://auth-user-frontend:80,http://frontend:80"
+  allowed-methods: "GET,POST,PUT,DELETE,OPTIONS"
+  allowed-headers: "*"
+  allow-credentials: true
+
+
+
+server:
+  port: 8080
+
+---
+# Profil de test
+spring:
+  config:
+    activate:
+      on-profile: test
+  
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: password
+  
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create-drop
+  
+  h2:
+    console:
+      enabled: true

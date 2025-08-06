@@ -1,0 +1,187 @@
+services:
+  # Base de données PostgreSQL dédiée au microservice auth-user-service
+  auth-user-db:
+    image: postgres:15-alpine
+    container_name: auth-user-db
+    environment:
+      POSTGRES_DB: auth_user_db
+      POSTGRES_USER: auth_user
+      POSTGRES_PASSWORD: auth_user_password
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
+    ports:
+      - "5433:5432"  # Port différent pour éviter les conflits
+    volumes:
+      - auth_user_db_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - auth-user-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U auth_user -d auth_user_db"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Application Spring Boot du microservice auth-user-service
+  auth-user-service:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: auth-user-service
+    environment:
+      # Configuration de la base de données
+      SPRING_DATASOURCE_URL: jdbc:postgresql://auth-user-db:5432/auth_user_db
+      SPRING_DATASOURCE_USERNAME: auth_user
+      SPRING_DATASOURCE_PASSWORD: auth_user_password
+      
+      # Configuration JPA/Hibernate
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_SHOW_SQL: false
+      SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
+      SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL: true
+      
+      # Configuration JWT
+      JWT_SECRET: "sprintbot-auth-user-service-secret-key-2024-very-long-and-secure"
+      JWT_EXPIRATION: 86400000  # 24 heures
+      JWT_REFRESH_EXPIRATION: 604800000  # 7 jours
+      
+      # Configuration CORS
+      CORS_ALLOWED_ORIGINS: "http://localhost:4200,http://localhost:4201,http://frontend:4200"
+      CORS_ALLOWED_METHODS: "GET,POST,PUT,DELETE,OPTIONS,PATCH"
+      CORS_ALLOWED_HEADERS: "*"
+      CORS_ALLOW_CREDENTIALS: true
+      
+      # Configuration du serveur
+      SERVER_PORT: 8081
+      
+      # Configuration des logs
+      LOGGING_LEVEL_COM_SPRINTBOT: DEBUG
+      LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY: DEBUG
+      
+      # Configuration Actuator
+      MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: "health,info,metrics,prometheus"
+      MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS: always
+      
+      # Profil actif
+      SPRING_PROFILES_ACTIVE: docker
+      
+    ports:
+      - "8085:8081"
+    volumes:
+      - auth_user_logs:/app/logs
+    networks:
+      - auth-user-network
+    depends_on:
+      auth-user-db:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # Frontend Angular avec Nginx
+  auth-user-frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: auth-user-frontend
+    ports:
+      - "4200:80"
+    environment:
+      - API_URL=http://localhost:8081
+    networks:
+      - auth-user-network
+    depends_on:
+      - auth-user-service
+    restart: unless-stopped
+
+  # Interface d'administration de la base de données (optionnel)
+  auth-user-pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: auth-user-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@sprintbot.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "5051:80"
+    volumes:
+      - auth_user_pgadmin_data:/var/lib/pgadmin
+    networks:
+      - auth-user-network
+    depends_on:
+      - auth-user-db
+    restart: unless-stopped
+    profiles:
+      - admin  # Utiliser --profile admin pour démarrer pgAdmin
+
+  # Monitoring avec Prometheus (optionnel)
+  auth-user-prometheus:
+    image: prom/prometheus:latest
+    container_name: auth-user-prometheus
+    ports:
+      - "9091:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - auth_user_prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    networks:
+      - auth-user-network
+    restart: unless-stopped
+    profiles:
+      - monitoring
+
+  # Monitoring avec Grafana (optionnel)
+  auth-user-grafana:
+    image: grafana/grafana:latest
+    container_name: auth-user-grafana
+    ports:
+      - "3001:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin123
+    volumes:
+      - auth_user_grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+    networks:
+      - auth-user-network
+    depends_on:
+      - auth-user-prometheus
+    restart: unless-stopped
+    profiles:
+      - monitoring
+
+# Volumes pour la persistance des données
+volumes:
+  auth_user_db_data:
+    driver: local
+    name: auth_user_db_data
+  auth_user_pgadmin_data:
+    driver: local
+    name: auth_user_pgadmin_data
+  auth_user_logs:
+    driver: local
+    name: auth_user_logs
+  auth_user_prometheus_data:
+    driver: local
+    name: auth_user_prometheus_data
+  auth_user_grafana_data:
+    driver: local
+    name: auth_user_grafana_data
+
+# Réseaux
+networks:
+  auth-user-network:
+    driver: bridge
+    name: auth-user-network

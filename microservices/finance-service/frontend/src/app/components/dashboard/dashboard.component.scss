@@ -1,0 +1,437 @@
+// Variables
+$primary-color: #1976d2;
+$accent-color: #ff9800;
+$warn-color: #f44336;
+$success-color: #4caf50;
+$info-color: #2196f3;
+
+// Container principal
+.dashboard-container {
+  padding: 24px;
+  background-color: #fafafa;
+  min-height: calc(100vh - 64px);
+}
+
+// Header
+.dashboard-header {
+  margin-bottom: 32px;
+  
+  .header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: white;
+    padding: 24px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    
+    .dashboard-title {
+      display: flex;
+      align-items: center;
+      margin: 0;
+      font-size: 28px;
+      font-weight: 400;
+      color: #333;
+      
+      mat-icon {
+        margin-right: 12px;
+        font-size: 32px;
+        width: 32px;
+        height: 32px;
+        color: $primary-color;
+      }
+    }
+    
+    .header-actions {
+      display: flex;
+      gap: 12px;
+    }
+  }
+}
+
+// États de chargement et d'erreur
+.loading-container,
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    margin-bottom: 16px;
+  }
+  
+  p {
+    margin: 16px 0;
+    color: #666;
+    font-size: 16px;
+  }
+}
+
+// Contenu du dashboard
+.dashboard-content {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+// Titre de section
+.section-title {
+  font-size: 20px;
+  font-weight: 500;
+  margin: 0 0 16px 0;
+  color: #333;
+  display: flex;
+  align-items: center;
+  
+  mat-icon {
+    margin-right: 8px;
+    color: $primary-color;
+  }
+}
+
+// Section des indicateurs
+.indicators-section {
+  .indicators-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    
+    .indicator-card {
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      
+      &:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+      }
+      
+      &.success {
+        border-left: 4px solid $success-color;
+        
+        .indicator-icon {
+          background-color: rgba($success-color, 0.1);
+          color: $success-color;
+        }
+      }
+      
+      &.warning {
+        border-left: 4px solid $accent-color;
+        
+        .indicator-icon {
+          background-color: rgba($accent-color, 0.1);
+          color: $accent-color;
+        }
+      }
+      
+      &.info {
+        border-left: 4px solid $info-color;
+        
+        .indicator-icon {
+          background-color: rgba($info-color, 0.1);
+          color: $info-color;
+        }
+      }
+      
+      &.neutral {
+        border-left: 4px solid #666;
+        
+        .indicator-icon {
+          background-color: rgba(#666, 0.1);
+          color: #666;
+        }
+      }
+      
+      .indicator-content {
+        display: flex;
+        align-items: center;
+        
+        .indicator-icon {
+          width: 56px;
+          height: 56px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-right: 16px;
+          
+          mat-icon {
+            font-size: 28px;
+            width: 28px;
+            height: 28px;
+          }
+        }
+        
+        .indicator-details {
+          flex: 1;
+          
+          .indicator-value {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: #333;
+          }
+          
+          .indicator-label {
+            font-size: 14px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Section des graphiques
+.charts-section {
+  .charts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 24px;
+    
+    .chart-card {
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+      }
+      
+      mat-card-header {
+        mat-card-title {
+          display: flex;
+          align-items: center;
+          font-size: 18px;
+          
+          mat-icon {
+            margin-right: 8px;
+            color: $primary-color;
+          }
+        }
+      }
+      
+      .chart-container {
+        height: 300px;
+        position: relative;
+        
+        canvas {
+          max-height: 100%;
+        }
+      }
+    }
+  }
+}
+
+// Section des alertes
+.alerts-section {
+  .alerts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 24px;
+    
+    .alert-card {
+      border-left: 4px solid $warn-color;
+      
+      mat-card-header {
+        mat-card-title {
+          display: flex;
+          align-items: center;
+          font-size: 16px;
+          
+          mat-icon {
+            margin-right: 8px;
+          }
+        }
+      }
+      
+      .alert-list {
+        .alert-item {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 12px 0;
+          border-bottom: 1px solid #f0f0f0;
+          
+          &:last-child {
+            border-bottom: none;
+          }
+          
+          .alert-content {
+            flex: 1;
+            margin-right: 12px;
+            
+            .alert-title {
+              font-weight: 500;
+              margin-bottom: 4px;
+              color: #333;
+            }
+            
+            .alert-description {
+              font-size: 12px;
+              color: #666;
+            }
+          }
+          
+          mat-progress-bar {
+            width: 100%;
+            margin-top: 8px;
+          }
+          
+          mat-chip {
+            font-size: 11px;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Section des actions rapides
+.quick-actions-section {
+  .quick-actions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    
+    .quick-action-btn {
+      height: 64px;
+      font-size: 14px;
+      font-weight: 500;
+      
+      mat-icon {
+        margin-right: 8px;
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+      }
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 1200px) {
+  .charts-grid {
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)) !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-container {
+    padding: 16px;
+  }
+  
+  .dashboard-header {
+    margin-bottom: 24px;
+    
+    .header-content {
+      flex-direction: column;
+      gap: 16px;
+      text-align: center;
+      
+      .dashboard-title {
+        font-size: 24px;
+      }
+    }
+  }
+  
+  .indicators-grid {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .charts-grid {
+    grid-template-columns: 1fr !important;
+    
+    .chart-card {
+      .chart-container {
+        height: 250px;
+      }
+    }
+  }
+  
+  .alerts-grid {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .quick-actions-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    
+    .quick-action-btn {
+      height: 56px;
+      font-size: 12px;
+      
+      mat-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-container {
+    padding: 12px;
+  }
+  
+  .quick-actions-grid {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .indicator-card {
+    .indicator-content {
+      .indicator-icon {
+        width: 48px;
+        height: 48px;
+        
+        mat-icon {
+          font-size: 24px;
+          width: 24px;
+          height: 24px;
+        }
+      }
+      
+      .indicator-details {
+        .indicator-value {
+          font-size: 20px;
+        }
+      }
+    }
+  }
+}
+
+// Animations
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dashboard-content > * {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.indicators-grid .indicator-card {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.charts-grid .chart-card {
+  animation: fadeInUp 0.8s ease-out;
+}
+
+.alerts-grid .alert-card {
+  animation: fadeInUp 1s ease-out;
+}

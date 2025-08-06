@@ -1,0 +1,253 @@
+<div class="budget-list-container">
+  <!-- Header avec titre et actions -->
+  <div class="header-section">
+    <div class="title-section">
+      <h2>
+        <mat-icon>account_balance_wallet</mat-icon>
+        Gestion des Budgets
+      </h2>
+      <p class="subtitle">Suivi et gestion des budgets de l'équipe</p>
+    </div>
+    
+    <div class="actions-section">
+      <button mat-raised-button color="primary" (click)="createBudget()">
+        <mat-icon>add</mat-icon>
+        Nouveau Budget
+      </button>
+      
+      <button mat-stroked-button (click)="exportBudgets()">
+        <mat-icon>download</mat-icon>
+        Exporter
+      </button>
+    </div>
+  </div>
+
+  <!-- Filtres -->
+  <mat-card class="filters-card">
+    <mat-card-header>
+      <mat-card-title>Filtres</mat-card-title>
+    </mat-card-header>
+    
+    <mat-card-content>
+      <div class="filters-grid">
+        <!-- Recherche par nom -->
+        <mat-form-field appearance="outline">
+          <mat-label>Rechercher</mat-label>
+          <input matInput (keyup)="applyFilter($event)" placeholder="Nom du budget...">
+          <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+
+        <!-- Filtre par statut -->
+        <mat-form-field appearance="outline">
+          <mat-label>Statut</mat-label>
+          <mat-select [(value)]="filters.statut" (selectionChange)="loadBudgets()">
+            <mat-option value="">Tous</mat-option>
+            <mat-option value="ACTIF">Actif</mat-option>
+            <mat-option value="CLOTURE">Clôturé</mat-option>
+            <mat-option value="SUSPENDU">Suspendu</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <!-- Filtre par période -->
+        <mat-form-field appearance="outline">
+          <mat-label>Période</mat-label>
+          <mat-select [(value)]="filters.periode" (selectionChange)="loadBudgets()">
+            <mat-option value="">Toutes</mat-option>
+            <mat-option value="MENSUEL">Mensuel</mat-option>
+            <mat-option value="TRIMESTRIEL">Trimestriel</mat-option>
+            <mat-option value="SEMESTRIEL">Semestriel</mat-option>
+            <mat-option value="ANNUEL">Annuel</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <!-- Date de début -->
+        <mat-form-field appearance="outline">
+          <mat-label>Date début (min)</mat-label>
+          <input matInput [matDatepicker]="pickerDebut" [(ngModel)]="filters.dateDebutMin" (dateChange)="loadBudgets()">
+          <mat-datepicker-toggle matSuffix [for]="pickerDebut"></mat-datepicker-toggle>
+          <mat-datepicker #pickerDebut></mat-datepicker>
+        </mat-form-field>
+
+        <!-- Date de fin -->
+        <mat-form-field appearance="outline">
+          <mat-label>Date début (max)</mat-label>
+          <input matInput [matDatepicker]="pickerFin" [(ngModel)]="filters.dateDebutMax" (dateChange)="loadBudgets()">
+          <mat-datepicker-toggle matSuffix [for]="pickerFin"></mat-datepicker-toggle>
+          <mat-datepicker #pickerFin></mat-datepicker>
+        </mat-form-field>
+
+        <!-- Bouton reset filtres -->
+        <button mat-stroked-button (click)="clearFilters()" class="clear-filters-btn">
+          <mat-icon>clear</mat-icon>
+          Effacer les filtres
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Tableau des budgets -->
+  <mat-card class="table-card">
+    <mat-card-content>
+      <!-- Loading spinner -->
+      <div *ngIf="loading" class="loading-container">
+        <mat-spinner diameter="50"></mat-spinner>
+        <p>Chargement des budgets...</p>
+      </div>
+
+      <!-- Tableau -->
+      <div *ngIf="!loading" class="table-container">
+        <table mat-table [dataSource]="dataSource" matSort class="budget-table">
+          
+          <!-- Colonne Nom -->
+          <ng-container matColumnDef="nom">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Nom</th>
+            <td mat-cell *matCellDef="let budget">
+              <div class="budget-name">
+                <strong>{{ budget.nom }}</strong>
+                <small *ngIf="budget.description">{{ budget.description }}</small>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Colonne Période -->
+          <ng-container matColumnDef="periode">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Période</th>
+            <td mat-cell *matCellDef="let budget">
+              <app-status-chip [status]="budget.periode" type="periode"></app-status-chip>
+            </td>
+          </ng-container>
+
+          <!-- Colonne Montant Total -->
+          <ng-container matColumnDef="montantTotal">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Montant Total</th>
+            <td mat-cell *matCellDef="let budget">
+              <app-currency-display [amount]="budget.montantTotal"></app-currency-display>
+            </td>
+          </ng-container>
+
+          <!-- Colonne Montant Utilisé -->
+          <ng-container matColumnDef="montantUtilise">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Utilisé</th>
+            <td mat-cell *matCellDef="let budget">
+              <app-currency-display [amount]="budget.montantUtilise"></app-currency-display>
+            </td>
+          </ng-container>
+
+          <!-- Colonne Pourcentage -->
+          <ng-container matColumnDef="pourcentageUtilise">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Progression</th>
+            <td mat-cell *matCellDef="let budget">
+              <div class="progress-container">
+                <mat-progress-bar 
+                  [value]="budget.pourcentageUtilise" 
+                  [color]="getPourcentageColor(budget.pourcentageUtilise)">
+                </mat-progress-bar>
+                <span class="progress-text">{{ budget.pourcentageUtilise | number:'1.1-1' }}%</span>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Colonne Statut -->
+          <ng-container matColumnDef="statut">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Statut</th>
+            <td mat-cell *matCellDef="let budget">
+              <app-status-chip [status]="budget.statut" type="budget"></app-status-chip>
+            </td>
+          </ng-container>
+
+          <!-- Colonne Date Début -->
+          <ng-container matColumnDef="dateDebut">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Date Début</th>
+            <td mat-cell *matCellDef="let budget">
+              {{ budget.dateDebut | dateFormat:'short' }}
+            </td>
+          </ng-container>
+
+          <!-- Colonne Date Fin -->
+          <ng-container matColumnDef="dateFin">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Date Fin</th>
+            <td mat-cell *matCellDef="let budget">
+              {{ budget.dateFin | dateFormat:'short' }}
+            </td>
+          </ng-container>
+
+          <!-- Colonne Actions -->
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Actions</th>
+            <td mat-cell *matCellDef="let budget">
+              <div class="actions-buttons">
+                <button mat-icon-button 
+                        matTooltip="Voir détails" 
+                        (click)="viewBudget(budget)">
+                  <mat-icon>visibility</mat-icon>
+                </button>
+                
+                <button mat-icon-button 
+                        matTooltip="Modifier" 
+                        (click)="editBudget(budget)"
+                        [disabled]="budget.statut === 'CLOTURE'">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                
+                <button mat-icon-button 
+                        [matMenuTriggerFor]="actionsMenu"
+                        matTooltip="Plus d'actions">
+                  <mat-icon>more_vert</mat-icon>
+                </button>
+                
+                <mat-menu #actionsMenu="matMenu">
+                  <button mat-menu-item 
+                          (click)="activerBudget(budget)"
+                          *ngIf="budget.statut !== 'ACTIF'">
+                    <mat-icon>play_arrow</mat-icon>
+                    <span>Activer</span>
+                  </button>
+                  
+                  <button mat-menu-item 
+                          (click)="cloturerBudget(budget)"
+                          *ngIf="budget.statut === 'ACTIF'">
+                    <mat-icon>stop</mat-icon>
+                    <span>Clôturer</span>
+                  </button>
+                  
+                  <mat-divider></mat-divider>
+                  
+                  <button mat-menu-item 
+                          (click)="deleteBudget(budget)"
+                          class="delete-action">
+                    <mat-icon>delete</mat-icon>
+                    <span>Supprimer</span>
+                  </button>
+                </mat-menu>
+              </div>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+
+        <!-- Message si aucun résultat -->
+        <div *ngIf="dataSource.data.length === 0" class="no-data">
+          <mat-icon>account_balance_wallet</mat-icon>
+          <h3>Aucun budget trouvé</h3>
+          <p>Créez votre premier budget pour commencer</p>
+          <button mat-raised-button color="primary" (click)="createBudget()">
+            <mat-icon>add</mat-icon>
+            Créer un budget
+          </button>
+        </div>
+
+        <!-- Pagination -->
+        <mat-paginator 
+          *ngIf="dataSource.data.length > 0"
+          [length]="totalElements"
+          [pageSize]="pageSize"
+          [pageSizeOptions]="[5, 10, 25, 50]"
+          (page)="onPageChange($event)"
+          showFirstLastButtons>
+        </mat-paginator>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

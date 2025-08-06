@@ -1,0 +1,322 @@
+<!-- Dashboard financier -->
+<div class="dashboard-container">
+  
+  <!-- Header avec actions -->
+  <div class="dashboard-header">
+    <div class="header-content">
+      <h1 class="dashboard-title">
+        <mat-icon>dashboard</mat-icon>
+        Tableau de bord financier
+      </h1>
+      <div class="header-actions">
+        <button mat-raised-button color="primary" (click)="refresh()" [disabled]="loading">
+          <mat-icon>refresh</mat-icon>
+          Actualiser
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading state -->
+  <div *ngIf="loading" class="loading-container">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Chargement des données financières...</p>
+  </div>
+
+  <!-- Error state -->
+  <div *ngIf="error && !loading" class="error-container">
+    <mat-icon color="warn">error</mat-icon>
+    <p>{{ error }}</p>
+    <button mat-raised-button color="primary" (click)="refresh()">
+      Réessayer
+    </button>
+  </div>
+
+  <!-- Dashboard content -->
+  <div *ngIf="!loading && !error" class="dashboard-content">
+    
+    <!-- Indicateurs clés -->
+    <div class="indicators-section">
+      <h2 class="section-title">Indicateurs clés</h2>
+      <div class="indicators-grid">
+        
+        <!-- Total Recettes -->
+        <mat-card class="indicator-card success">
+          <mat-card-content>
+            <div class="indicator-content">
+              <div class="indicator-icon">
+                <mat-icon>trending_up</mat-icon>
+              </div>
+              <div class="indicator-details">
+                <div class="indicator-value">{{ formatCurrency(indicateurs.totalRecettes) }}</div>
+                <div class="indicator-label">Total Recettes</div>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Total Dépenses -->
+        <mat-card class="indicator-card warning">
+          <mat-card-content>
+            <div class="indicator-content">
+              <div class="indicator-icon">
+                <mat-icon>trending_down</mat-icon>
+              </div>
+              <div class="indicator-details">
+                <div class="indicator-value">{{ formatCurrency(indicateurs.totalDepenses) }}</div>
+                <div class="indicator-label">Total Dépenses</div>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Solde -->
+        <mat-card class="indicator-card" [ngClass]="getIndicatorColor(indicateurs.solde, 'positive')">
+          <mat-card-content>
+            <div class="indicator-content">
+              <div class="indicator-icon">
+                <mat-icon>account_balance</mat-icon>
+              </div>
+              <div class="indicator-details">
+                <div class="indicator-value">{{ formatCurrency(indicateurs.solde) }}</div>
+                <div class="indicator-label">Solde</div>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Budget Utilisé -->
+        <mat-card class="indicator-card info">
+          <mat-card-content>
+            <div class="indicator-content">
+              <div class="indicator-icon">
+                <mat-icon>pie_chart</mat-icon>
+              </div>
+              <div class="indicator-details">
+                <div class="indicator-value">{{ formatPercentage(indicateurs.budgetUtilise) }}</div>
+                <div class="indicator-label">Budget Utilisé</div>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+      </div>
+    </div>
+
+    <!-- Graphiques -->
+    <div class="charts-section">
+      <div class="charts-grid">
+        
+        <!-- Évolution de trésorerie -->
+        <mat-card class="chart-card">
+          <mat-card-header>
+            <mat-card-title>
+              <mat-icon>show_chart</mat-icon>
+              Évolution de trésorerie
+            </mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="chart-container">
+              <canvas 
+                baseChart
+                [data]="tresorerieChartData"
+                [type]="tresorerieChartType"
+                [options]="chartOptions">
+              </canvas>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Répartition des recettes -->
+        <mat-card class="chart-card">
+          <mat-card-header>
+            <mat-card-title>
+              <mat-icon>donut_large</mat-icon>
+              Répartition des recettes
+            </mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="chart-container">
+              <canvas 
+                baseChart
+                [data]="recettesChartData"
+                [type]="recettesChartType"
+                [options]="chartOptions">
+              </canvas>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Répartition des dépenses -->
+        <mat-card class="chart-card">
+          <mat-card-header>
+            <mat-card-title>
+              <mat-icon>donut_large</mat-icon>
+              Répartition des dépenses
+            </mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="chart-container">
+              <canvas 
+                baseChart
+                [data]="depensesChartData"
+                [type]="depensesChartType"
+                [options]="chartOptions">
+              </canvas>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- État des budgets -->
+        <mat-card class="chart-card">
+          <mat-card-header>
+            <mat-card-title>
+              <mat-icon>bar_chart</mat-icon>
+              État des budgets
+            </mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="chart-container">
+              <canvas 
+                baseChart
+                [data]="budgetsChartData"
+                [type]="budgetsChartType"
+                [options]="chartOptions">
+              </canvas>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+      </div>
+    </div>
+
+    <!-- Alertes et notifications -->
+    <div class="alerts-section">
+      <div class="alerts-grid">
+        
+        <!-- Budgets en alerte -->
+        <mat-card class="alert-card" *ngIf="budgetsEnAlerte.length > 0">
+          <mat-card-header>
+            <mat-card-title>
+              <mat-icon color="warn">warning</mat-icon>
+              Budgets en alerte ({{ budgetsEnAlerte.length }})
+            </mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="alert-list">
+              <div *ngFor="let budget of budgetsEnAlerte" class="alert-item">
+                <div class="alert-content">
+                  <div class="alert-title">{{ budget.nom }}</div>
+                  <div class="alert-description">
+                    {{ formatPercentage((budget.montantUtilise / budget.montantTotal) * 100) }} utilisé
+                    ({{ formatCurrency(budget.montantUtilise) }} / {{ formatCurrency(budget.montantTotal) }})
+                  </div>
+                </div>
+                <mat-progress-bar 
+                  mode="determinate" 
+                  [value]="(budget.montantUtilise / budget.montantTotal) * 100"
+                  color="warn">
+                </mat-progress-bar>
+              </div>
+            </div>
+          </mat-card-content>
+          <mat-card-actions>
+            <button mat-button routerLink="/budgets">
+              Voir tous les budgets
+            </button>
+          </mat-card-actions>
+        </mat-card>
+
+        <!-- Transactions en attente -->
+        <mat-card class="alert-card" *ngIf="transactionsEnAttente.length > 0">
+          <mat-card-header>
+            <mat-card-title>
+              <mat-icon color="accent">schedule</mat-icon>
+              Transactions en attente ({{ transactionsEnAttente.length }})
+            </mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="alert-list">
+              <div *ngFor="let transaction of transactionsEnAttente.slice(0, 5)" class="alert-item">
+                <div class="alert-content">
+                  <div class="alert-title">{{ transaction.description }}</div>
+                  <div class="alert-description">
+                    {{ formatCurrency(transaction.montant) }} - {{ transaction.dateTransaction | date:'dd/MM/yyyy' }}
+                  </div>
+                </div>
+                <mat-chip [color]="transaction.typeTransaction === 'RECETTE' ? 'primary' : 'accent'">
+                  {{ transaction.typeTransaction }}
+                </mat-chip>
+              </div>
+            </div>
+          </mat-card-content>
+          <mat-card-actions>
+            <button mat-button routerLink="/transactions">
+              Voir toutes les transactions
+            </button>
+          </mat-card-actions>
+        </mat-card>
+
+        <!-- Sponsors expirants -->
+        <mat-card class="alert-card" *ngIf="sponsorsExpirants.length > 0">
+          <mat-card-header>
+            <mat-card-title>
+              <mat-icon color="warn">event</mat-icon>
+              Contrats sponsors expirants ({{ sponsorsExpirants.length }})
+            </mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="alert-list">
+              <div *ngFor="let sponsor of sponsorsExpirants" class="alert-item">
+                <div class="alert-content">
+                  <div class="alert-title">{{ sponsor.nom }}</div>
+                  <div class="alert-description">
+                    Expire le {{ sponsor.dateFin | date:'dd/MM/yyyy' }}
+                  </div>
+                </div>
+                <mat-chip color="warn">
+                  {{ sponsor.typePartenariat }}
+                </mat-chip>
+              </div>
+            </div>
+          </mat-card-content>
+          <mat-card-actions>
+            <button mat-button routerLink="/sponsors">
+              Voir tous les sponsors
+            </button>
+          </mat-card-actions>
+        </mat-card>
+
+      </div>
+    </div>
+
+    <!-- Actions rapides -->
+    <div class="quick-actions-section">
+      <h2 class="section-title">Actions rapides</h2>
+      <div class="quick-actions-grid">
+        
+        <button mat-raised-button color="primary" routerLink="/transactions/nouvelle" class="quick-action-btn">
+          <mat-icon>add</mat-icon>
+          Nouvelle transaction
+        </button>
+        
+        <button mat-raised-button color="accent" routerLink="/budgets/nouveau" class="quick-action-btn">
+          <mat-icon>account_balance_wallet</mat-icon>
+          Créer un budget
+        </button>
+        
+        <button mat-raised-button routerLink="/sponsors/nouveau" class="quick-action-btn">
+          <mat-icon>handshake</mat-icon>
+          Ajouter un sponsor
+        </button>
+        
+        <button mat-raised-button routerLink="/rapports" class="quick-action-btn">
+          <mat-icon>assessment</mat-icon>
+          Générer un rapport
+        </button>
+        
+      </div>
+    </div>
+
+  </div>
+</div>

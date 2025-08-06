@@ -1,0 +1,310 @@
+# Finance Service - Fichiers à ignorer
+
+# ===========================================
+# CONFIGURATION ET SECRETS
+# ===========================================
+.env
+.env.local
+.env.production
+.env.test
+*.env
+secrets/
+config/local/
+application-local.yml
+application-secret.yml
+
+# ===========================================
+# BACKEND JAVA/SPRING BOOT
+# ===========================================
+
+# Maven
+backend/target/
+backend/.mvn/wrapper/maven-wrapper.jar
+backend/.mvn/wrapper/maven-wrapper.properties
+backend/mvnw
+backend/mvnw.cmd
+
+# IDE
+backend/.idea/
+backend/.vscode/
+backend/*.iml
+backend/*.ipr
+backend/*.iws
+backend/.project
+backend/.classpath
+backend/.settings/
+backend/bin/
+
+# Logs
+backend/logs/
+backend/*.log
+backend/spring.log
+
+# Temporary files
+backend/tmp/
+backend/temp/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# ===========================================
+# FRONTEND ANGULAR
+# ===========================================
+
+# Dependencies
+frontend/node_modules/
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+
+# Build outputs
+frontend/dist/
+frontend/build/
+frontend/.angular/
+
+# IDE
+frontend/.vscode/
+frontend/.idea/
+frontend/*.sublime-project
+frontend/*.sublime-workspace
+
+# OS
+frontend/.DS_Store
+frontend/Thumbs.db
+
+# Angular specific
+frontend/.angular/cache/
+frontend/.sass-cache/
+frontend/connect.lock
+frontend/coverage/
+frontend/libpeerconnection.log
+frontend/testem.log
+frontend/typings/
+
+# e2e
+frontend/e2e/*.js
+frontend/e2e/*.map
+
+# System Files
+frontend/.DS_Store
+frontend/Thumbs.db
+
+# ===========================================
+# DOCKER
+# ===========================================
+.docker/
+docker-compose.override.yml
+docker-compose.local.yml
+
+# ===========================================
+# BASE DE DONNÉES
+# ===========================================
+*.db
+*.sqlite
+*.sqlite3
+backup/
+dumps/
+data/
+
+# PostgreSQL
+postgres-data/
+pgdata/
+
+# ===========================================
+# LOGS ET MONITORING
+# ===========================================
+logs/
+*.log
+*.log.*
+log/
+
+# Prometheus
+prometheus-data/
+
+# Grafana
+grafana-data/
+
+# ===========================================
+# RAPPORTS ET UPLOADS
+# ===========================================
+reports/
+uploads/
+exports/
+temp-files/
+*.pdf
+*.xlsx
+*.csv
+*.zip
+
+# ===========================================
+# CERTIFICATS ET CLÉS
+# ===========================================
+*.pem
+*.key
+*.crt
+*.p12
+*.jks
+ssl/
+certificates/
+
+# ===========================================
+# TESTS
+# ===========================================
+test-results/
+coverage/
+.nyc_output/
+junit.xml
+test-output/
+
+# ===========================================
+# CACHE ET TEMPORAIRES
+# ===========================================
+.cache/
+cache/
+tmp/
+temp/
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# ===========================================
+# OUTILS DE DÉVELOPPEMENT
+# ===========================================
+
+# JetBrains
+.idea/
+*.iml
+
+# Visual Studio Code
+.vscode/
+*.code-workspace
+
+# Eclipse
+.metadata
+.recommenders
+.project
+.classpath
+.settings/
+
+# NetBeans
+nbproject/private/
+build/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+
+# ===========================================
+# SYSTÈME D'EXPLOITATION
+# ===========================================
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msm
+*.msp
+*.lnk
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# ===========================================
+# ARCHIVES
+# ===========================================
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+
+# ===========================================
+# VARIABLES D'ENVIRONNEMENT SPÉCIFIQUES
+# ===========================================
+
+# Développement local
+.env.development.local
+.env.local
+
+# Test
+.env.test.local
+
+# Production (ne jamais commiter)
+.env.production.local
+
+# ===========================================
+# DONNÉES SENSIBLES
+# ===========================================
+passwords.txt
+secrets.txt
+private-keys/
+api-keys.txt
+tokens.txt
+
+# ===========================================
+# FICHIERS DE SAUVEGARDE
+# ===========================================
+*.bak
+*.backup
+*.old
+*.orig
+*.save
+
+# ===========================================
+# DOCUMENTATION GÉNÉRÉE
+# ===========================================
+docs/generated/
+api-docs/
+javadoc/
+
+# ===========================================
+# PROFILING ET DEBUGGING
+# ===========================================
+*.hprof
+*.prof
+hs_err_pid*
+replay_pid*
+
+# ===========================================
+# CONFIGURATION LOCALE
+# ===========================================
+local.properties
+local-config.yml
+dev-config.yml

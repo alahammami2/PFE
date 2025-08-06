@@ -1,0 +1,23 @@
+services:
+  planning-performance-db:
+    image: postgres:15-alpine
+    container_name: planning-performance-db
+    environment:
+      POSTGRES_DB: planning_performance_db
+      POSTGRES_USER: planning_user
+      POSTGRES_PASSWORD: planning_password
+    ports:
+      - "5434:5432"
+    volumes:
+      - planning_performance_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - planning-performance-network
+    restart: unless-stopped
+
+volumes:
+  planning_performance_data:
+
+networks:
+  planning-performance-network:
+    driver: bridge

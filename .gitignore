@@ -1,0 +1,206 @@
+# ===================================
+# SprintBot - Plateforme Volley-Ball
+# ===================================
+
+# ===== BACKEND (Spring Boot) =====
+# Dossiers de compilation Maven
+**/target/
+**/.mvn/wrapper/maven-wrapper.jar
+**/.mvn/wrapper/maven-wrapper.properties
+**/mvnw
+**/mvnw.cmd
+
+# Logs
+**/logs/
+**/*.log
+**/spring.log
+
+# IDE
+backend/SprintBot/.idea/
+backend/SprintBot/.vscode/
+backend/SprintBot/*.iml
+backend/SprintBot/*.ipr
+backend/SprintBot/*.iws
+
+# OS
+.DS_Store
+Thumbs.db
+
+# ===== FRONTEND (Angular) =====
+# Node modules et build
+**/node_modules/
+**/dist/
+**/.angular/
+**/tmp/
+**/out-tsc/
+**/bazel-out/
+
+# Dependencies
+**/npm-debug.log*
+**/yarn-debug.log*
+**/yarn-error.log*
+**/package-lock.json
+**/yarn.lock
+
+# Misc Angular
+**/.sass-cache/
+**/connect.lock
+**/coverage/
+**/libpeerconnection.log
+**/testem.log
+**/typings/
+
+# e2e
+**/e2e/*.js
+**/e2e/*.map
+
+# ===== DOCKER =====
+# Volumes de données
+postgres_data/
+jenkins_home/
+
+# Logs Docker
+docker-compose.override.yml
+.env.local
+.env.production
+
+# ===== JENKINS =====
+# Données Jenkins (si local)
+jenkins_data/
+.jenkins/
+
+# ===== CONFIGURATION SENSIBLE =====
+# Variables d'environnement
+.env
+.env.local
+.env.production
+.env.staging
+
+# Secrets
+secrets/
+*.key
+*.pem
+*.p12
+*.jks
+
+# Base de données locale
+*.db
+*.sqlite
+*.sqlite3
+
+# ===== LOGS ET TEMPORAIRES =====
+logs/
+*.log
+*.tmp
+*.temp
+temp/
+tmp/
+
+# ===== SYSTÈME =====
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+
+# Linux
+*~
+.nfs*
+
+# ===== IDE ET ÉDITEURS =====
+# IntelliJ IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+out/
+
+# Visual Studio Code
+.vscode/
+*.code-workspace
+
+# Eclipse
+.metadata
+.recommenders/
+.project
+.classpath
+.settings/
+bin/
+
+# NetBeans
+nbproject/private/
+build/
+nbbuild/
+nbdist/
+.nb-gradle/
+
+# ===== OUTILS DE BUILD =====
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# Gradle
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# ===== SÉCURITÉ =====
+# Certificats SSL
+*.crt
+*.csr
+*.key
+*.pem
+ssl/
+
+# Mots de passe et tokens
+passwords.txt
+tokens.txt
+credentials.json
+
+# ===== MONITORING =====
+# Métriques et monitoring
+metrics/
+monitoring/
+grafana/data/
+prometheus/data/
+
+# ===== BACKUP =====
+backup/
+*.backup
+*.bak
+*.old
+
+# ===== DOCUMENTATION GÉNÉRÉE =====
+docs/generated/
+javadoc/
+typedoc/
+
+# ===== TESTS =====
+# Rapports de tests
+test-results/
+coverage/
+.nyc_output/
+junit.xml
+
+# ===== CACHE =====
+.cache/
+.npm/
+.yarn/
+.pnpm-store/

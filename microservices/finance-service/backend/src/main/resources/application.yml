@@ -1,0 +1,287 @@
+# Configuration du microservice Finance
+spring:
+  application:
+    name: finance-service
+  
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+
+---
+# Configuration commune
+server:
+  port: ${SERVER_PORT:8085}
+  servlet:
+    context-path: /api
+  error:
+    include-message: always
+    include-binding-errors: always
+
+spring:
+  # Configuration JPA
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: ${SHOW_SQL:false}
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+        use_sql_comments: true
+        jdbc:
+          batch_size: 20
+        order_inserts: true
+        order_updates: true
+    open-in-view: false
+
+  # Configuration Flyway
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    validate-on-migrate: true
+    locations: classpath:db/migration
+    schemas: finance
+
+  # Configuration Jackson
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+      fail-on-empty-beans: false
+    deserialization:
+      fail-on-unknown-properties: false
+    default-property-inclusion: non_null
+    time-zone: Europe/Paris
+
+  # Configuration Cache
+  cache:
+    type: redis
+    redis:
+      time-to-live: 600000 # 10 minutes
+
+  # Configuration Mail
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+  # Configuration Multipart
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+# Configuration JWT
+jwt:
+  secret: ${JWT_SECRET:finance-service-secret-key-very-long-and-secure}
+  expiration: ${JWT_EXPIRATION:86400000} # 24 heures
+  refresh-expiration: ${JWT_REFRESH_EXPIRATION:604800000} # 7 jours
+
+# Configuration CORS
+cors:
+  allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:4205,http://localhost:4200}
+  allowed-methods: GET,POST,PUT,DELETE,OPTIONS
+  allowed-headers: "*"
+  allow-credentials: true
+
+# Configuration Finance spécifique
+finance:
+  # Configuration des rapports
+  reports:
+    output-directory: ${REPORTS_OUTPUT_DIR:./reports}
+    template-directory: ${REPORTS_TEMPLATE_DIR:./templates}
+    max-export-records: ${MAX_EXPORT_RECORDS:10000}
+  
+  # Configuration des budgets
+  budget:
+    alert-threshold: ${BUDGET_ALERT_THRESHOLD:0.8} # 80% du budget
+    auto-close-expired: ${BUDGET_AUTO_CLOSE:true}
+  
+  # Configuration des sponsors
+  sponsors:
+    contract-renewal-days: ${SPONSOR_RENEWAL_DAYS:30} # Alerte 30 jours avant
+    auto-reminder: ${SPONSOR_AUTO_REMINDER:true}
+  
+  # Configuration des salaires
+  payroll:
+    calculation-day: ${PAYROLL_CALCULATION_DAY:25} # 25 du mois
+    payment-day: ${PAYROLL_PAYMENT_DAY:30} # 30 du mois
+    auto-calculate: ${PAYROLL_AUTO_CALCULATE:true}
+
+# Configuration Actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: when-authorized
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+# Configuration Logging
+logging:
+  level:
+    com.sprintbot.finance: ${LOG_LEVEL:INFO}
+    org.springframework.security: ${SECURITY_LOG_LEVEL:WARN}
+    org.hibernate.SQL: ${SQL_LOG_LEVEL:WARN}
+    org.hibernate.type.descriptor.sql.BasicBinder: ${SQL_PARAMS_LOG_LEVEL:WARN}
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+# Configuration OpenAPI
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
+  info:
+    title: SprintBot Finance Service API
+    description: API de gestion financière pour les équipes de volleyball
+    version: 1.0.0
+    contact:
+      name: SprintBot Team
+      email: support@sprintbot.com
+
+# Configuration du serveur
+server:
+  port: 8085
+
+# Configuration Eureka Client
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_CLIENT_SERVICE_URL:http://localhost:8761/eureka/}
+    register-with-eureka: true
+    fetch-registry: true
+    registry-fetch-interval-seconds: 30
+  instance:
+    hostname: ${EUREKA_INSTANCE_HOSTNAME:localhost}
+    prefer-ip-address: true
+    lease-renewal-interval-in-seconds: 30
+    lease-expiration-duration-in-seconds: 90
+    metadata-map:
+      version: "1.0.0"
+      description: "Finance Service - Gestion financière et budgétaire"
+      team: "SprintBot"
+
+---
+# Profil de développement
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+  # Base de données de développement
+  datasource:
+    url: jdbc:postgresql://localhost:5437/finance_db
+    username: ${DB_USERNAME:finance_user}
+    password: ${DB_PASSWORD:finance_password}
+    driver-class-name: org.postgresql.Driver
+
+  # Configuration Redis de développement
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      database: 3
+
+  # Configuration de développement
+  jpa:
+    show-sql: true
+  
+logging:
+  level:
+    com.sprintbot.finance: DEBUG
+
+---
+# Profil Docker
+spring:
+  config:
+    activate:
+      on-profile: docker
+
+  # Base de données Docker
+  datasource:
+    url: jdbc:postgresql://finance-db:5432/finance_db
+    username: ${DB_USERNAME:finance_user}
+    password: ${DB_PASSWORD:finance_password}
+    driver-class-name: org.postgresql.Driver
+
+  # Configuration Redis Docker
+  data:
+    redis:
+      host: ${REDIS_HOST:redis}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      database: 3
+
+# Configuration Eureka pour Docker
+eureka:
+  client:
+    service-url:
+      defaultZone: http://discovery-service:8761/eureka/
+  instance:
+    hostname: finance-service
+    prefer-ip-address: true
+
+---
+# Profil de production
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+  # Base de données de production
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:finance_db}
+    username: ${DB_USERNAME:finance_user}
+    password: ${DB_PASSWORD:finance_password}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+
+  # Configuration Redis de production
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      database: 3
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+
+  # Configuration de production
+  jpa:
+    show-sql: false
+
+# Configuration de sécurité renforcée
+server:
+  error:
+    include-message: never
+    include-binding-errors: never
+
+logging:
+  level:
+    com.sprintbot.finance: INFO
+    org.springframework.security: WARN

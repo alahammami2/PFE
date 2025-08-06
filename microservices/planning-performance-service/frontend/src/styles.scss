@@ -1,0 +1,363 @@
+/* Styles globaux pour l'application Planning & Performance */
+
+/* Variables CSS personnalisées */
+:root {
+  --primary-color: #1976d2;
+  --secondary-color: #424242;
+  --accent-color: #ff4081;
+  --success-color: #4caf50;
+  --warning-color: #ff9800;
+  --danger-color: #f44336;
+  --info-color: #2196f3;
+  --light-color: #f5f5f5;
+  --dark-color: #212529;
+  
+  --border-radius: 8px;
+  --box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  --transition: all 0.3s ease;
+}
+
+/* Reset et styles de base */
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: 'Roboto', sans-serif;
+  background-color: var(--light-color);
+}
+
+/* Styles pour les cartes */
+.card {
+  border: none;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  transition: var(--transition);
+  
+  &:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    transform: translateY(-2px);
+  }
+}
+
+.card-header {
+  background: linear-gradient(135deg, var(--primary-color), #1565c0);
+  color: white;
+  border-radius: var(--border-radius) var(--border-radius) 0 0 !important;
+  
+  h5, h6 {
+    margin: 0;
+    font-weight: 500;
+  }
+}
+
+/* Styles pour les boutons */
+.btn {
+  border-radius: var(--border-radius);
+  font-weight: 500;
+  transition: var(--transition);
+  
+  &.btn-primary {
+    background: linear-gradient(135deg, var(--primary-color), #1565c0);
+    border: none;
+    
+    &:hover {
+      background: linear-gradient(135deg, #1565c0, #0d47a1);
+      transform: translateY(-1px);
+    }
+  }
+  
+  &.btn-success {
+    background: linear-gradient(135deg, var(--success-color), #388e3c);
+    border: none;
+  }
+  
+  &.btn-warning {
+    background: linear-gradient(135deg, var(--warning-color), #f57c00);
+    border: none;
+  }
+  
+  &.btn-danger {
+    background: linear-gradient(135deg, var(--danger-color), #d32f2f);
+    border: none;
+  }
+}
+
+/* Styles pour les formulaires */
+.form-control {
+  border-radius: var(--border-radius);
+  border: 1px solid #ddd;
+  transition: var(--transition);
+  
+  &:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(25, 118, 210, 0.25);
+  }
+}
+
+.form-label {
+  font-weight: 500;
+  color: var(--secondary-color);
+  margin-bottom: 0.5rem;
+}
+
+/* Styles pour les badges */
+.badge {
+  border-radius: var(--border-radius);
+  font-weight: 500;
+  
+  &.badge-status {
+    &.planifie { background-color: var(--info-color); }
+    &.en-cours { background-color: var(--warning-color); }
+    &.termine { background-color: var(--success-color); }
+    &.annule { background-color: var(--danger-color); }
+  }
+  
+  &.badge-type {
+    &.physique { background-color: #e91e63; }
+    &.technique { background-color: #9c27b0; }
+    &.tactique { background-color: #673ab7; }
+    &.match { background-color: #ff5722; }
+  }
+}
+
+/* Styles pour les tableaux */
+.table {
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  
+  th {
+    background-color: var(--primary-color);
+    color: white;
+    font-weight: 500;
+    border: none;
+  }
+  
+  td {
+    vertical-align: middle;
+    border-color: #eee;
+  }
+  
+  .table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(0,0,0,0.02);
+  }
+}
+
+/* Styles pour les alertes */
+.alert {
+  border-radius: var(--border-radius);
+  border: none;
+  
+  &.alert-success {
+    background: linear-gradient(135deg, #e8f5e8, #c8e6c9);
+    color: #2e7d32;
+  }
+  
+  &.alert-warning {
+    background: linear-gradient(135deg, #fff3e0, #ffcc02);
+    color: #ef6c00;
+  }
+  
+  &.alert-danger {
+    background: linear-gradient(135deg, #ffebee, #ffcdd2);
+    color: #c62828;
+  }
+  
+  &.alert-info {
+    background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+    color: #1565c0;
+  }
+}
+
+/* Styles pour les statistiques */
+.stat-card {
+  background: white;
+  border-radius: var(--border-radius);
+  padding: 1.5rem;
+  text-align: center;
+  box-shadow: var(--box-shadow);
+  transition: var(--transition);
+  
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+  }
+  
+  .stat-number {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+  }
+  
+  .stat-label {
+    color: var(--secondary-color);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  &.stat-primary .stat-number { color: var(--primary-color); }
+  &.stat-success .stat-number { color: var(--success-color); }
+  &.stat-warning .stat-number { color: var(--warning-color); }
+  &.stat-danger .stat-number { color: var(--danger-color); }
+}
+
+/* Styles pour les notes de performance */
+.performance-note {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--border-radius);
+  font-weight: bold;
+  color: white;
+  
+  &.note-excellent { background-color: #4caf50; }
+  &.note-bon { background-color: #8bc34a; }
+  &.note-moyen { background-color: #ff9800; }
+  &.note-faible { background-color: #f44336; }
+}
+
+/* Styles pour les indicateurs de progression */
+.progress {
+  border-radius: var(--border-radius);
+  height: 8px;
+  
+  .progress-bar {
+    border-radius: var(--border-radius);
+    transition: var(--transition);
+  }
+}
+
+/* Styles pour les modales */
+.modal-content {
+  border-radius: var(--border-radius);
+  border: none;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.modal-header {
+  background: linear-gradient(135deg, var(--primary-color), #1565c0);
+  color: white;
+  border-radius: var(--border-radius) var(--border-radius) 0 0;
+  
+  .modal-title {
+    font-weight: 500;
+  }
+  
+  .btn-close {
+    filter: invert(1);
+  }
+}
+
+/* Styles pour les listes */
+.list-group-item {
+  border-radius: var(--border-radius) !important;
+  margin-bottom: 0.5rem;
+  border: 1px solid #eee;
+  transition: var(--transition);
+  
+  &:hover {
+    background-color: #f8f9fa;
+    transform: translateX(5px);
+  }
+  
+  &.active {
+    background: linear-gradient(135deg, var(--primary-color), #1565c0);
+    border-color: var(--primary-color);
+  }
+}
+
+/* Styles pour les calendriers */
+.calendar-day {
+  border-radius: var(--border-radius);
+  transition: var(--transition);
+  
+  &.has-training {
+    background-color: var(--primary-color);
+    color: white;
+  }
+  
+  &.today {
+    border: 2px solid var(--accent-color);
+  }
+}
+
+/* Styles responsifs */
+@media (max-width: 768px) {
+  .card {
+    margin-bottom: 1rem;
+  }
+  
+  .stat-card {
+    margin-bottom: 1rem;
+  }
+  
+  .table-responsive {
+    font-size: 0.9rem;
+  }
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideIn {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+.fade-in {
+  animation: fadeIn 0.5s ease-out;
+}
+
+.slide-in {
+  animation: slideIn 0.3s ease-out;
+}
+
+/* Styles pour les graphiques */
+.chart-container {
+  position: relative;
+  height: 300px;
+  margin: 1rem 0;
+}
+
+/* Styles pour les filtres */
+.filter-section {
+  background: white;
+  border-radius: var(--border-radius);
+  padding: 1rem;
+  margin-bottom: 1rem;
+  box-shadow: var(--box-shadow);
+}
+
+/* Styles pour les actions rapides */
+.quick-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  
+  .btn {
+    flex: 1;
+    min-width: 120px;
+  }
+}
+
+/* Styles pour les notifications */
+.notification-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background-color: var(--danger-color);
+  color: white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  font-size: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

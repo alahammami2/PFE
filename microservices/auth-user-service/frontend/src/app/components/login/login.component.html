@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SprintBot - Connexion</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .logo h1 {
+            color: #333;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .logo p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #333;
+            font-weight: 500;
+        }
+
+        input[type="email"],
+        input[type="password"] {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e1e5e9;
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        input[type="email"]:focus,
+        input[type="password"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 0.75rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-login:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .alert {
+            padding: 0.75rem;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #ffffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .test-accounts {
+            margin-top: 2rem;
+            padding: 1rem;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            border-left: 4px solid #667eea;
+        }
+
+        .test-accounts h3 {
+            color: #333;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .test-accounts ul {
+            list-style: none;
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .test-accounts li {
+            margin-bottom: 0.25rem;
+        }
+
+        .test-accounts strong {
+            color: #333;
+        }
+
+        .user-info {
+            margin-top: 2rem;
+            padding: 1rem;
+            background-color: #e8f5e8;
+            border-radius: 5px;
+            display: none;
+        }
+
+        .user-info.show {
+            display: block;
+        }
+
+        .user-info h3 {
+            color: #155724;
+            margin-bottom: 1rem;
+        }
+
+        .user-info p {
+            margin-bottom: 0.5rem;
+            color: #155724;
+        }
+
+        .btn-logout {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo">
+            <h1>🏐 SprintBot</h1>
+            <p>Microservice Auth-User-Service</p>
+        </div>
+
+        <!-- Formulaire de connexion -->
+        <form id="loginForm">
+            <div id="alertContainer"></div>
+
+            <div class="form-group">
+                <label for="email">Email :</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Mot de passe :</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+
+            <button type="submit" class="btn-login" id="loginBtn">
+                <span id="loginText">Se connecter</span>
+                <span id="loginLoading" class="loading" style="display: none;"></span>
+            </button>
+        </form>
+
+        <!-- Informations utilisateur connecté -->
+        <div id="userInfo" class="user-info">
+            <h3>✅ Connexion réussie !</h3>
+            <p><strong>Nom :</strong> <span id="userName"></span></p>
+            <p><strong>Email :</strong> <span id="userEmail"></span></p>
+            <p><strong>Rôle :</strong> <span id="userRole"></span></p>
+            <p><strong>Statut :</strong> <span id="userStatus"></span></p>
+            <button class="btn-logout" onclick="logout()">Se déconnecter</button>
+        </div>
+
+        <!-- Comptes de test -->
+        <div class="test-accounts">
+            <h3>🧪 Comptes de test disponibles :</h3>
+            <ul>
+                <li><strong>Admin :</strong> admin@sprintbot.com / admin123</li>
+                <li><strong>Coach :</strong> coach@sprintbot.com / coach123</li>
+                <li><strong>Joueur :</strong> joueur@sprintbot.com / joueur123</li>
+                <li><strong>Médecin :</strong> medecin@sprintbot.com / medecin123</li>
+                <li><strong>Financier :</strong> financier@sprintbot.com / financier123</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8081/api';
+        let currentUser = null;
+
+        // Fonction de connexion
+        async function login(email, password) {
+            try {
+                const response = await fetch(`${API_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        motDePasse: password
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Stockage du token
+                    localStorage.setItem('access_token', data.accessToken);
+                    localStorage.setItem('refresh_token', data.refreshToken);
+                    localStorage.setItem('user_info', JSON.stringify(data.user));
+                    
+                    currentUser = data.user;
+                    showUserInfo(data.user);
+                    showAlert('Connexion réussie !', 'success');
+                    
+                    return { success: true, user: data.user };
+                } else {
+                    throw new Error(data.message || 'Erreur de connexion');
+                }
+            } catch (error) {
+                console.error('Erreur de connexion:', error);
+                showAlert(error.message || 'Erreur de connexion', 'error');
+                return { success: false, error: error.message };
+            }
+        }
+
+        // Fonction de déconnexion
+        async function logout() {
+            try {
+                const token = localStorage.getItem('access_token');
+                if (token && currentUser) {
+                    await fetch(`${API_URL}/auth/logout`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({
+                            email: currentUser.email
+                        })
+                    });
+                }
+            } catch (error) {
+                console.error('Erreur de déconnexion:', error);
+            } finally {
+                // Nettoyage local
+                localStorage.removeItem('access_token');
+                localStorage.removeItem('refresh_token');
+                localStorage.removeItem('user_info');
+                currentUser = null;
+                
+                hideUserInfo();
+                showAlert('Déconnexion réussie', 'success');
+            }
+        }
+
+        // Affichage des informations utilisateur
+        function showUserInfo(user) {
+            document.getElementById('userName').textContent = `${user.prenom} ${user.nom}`;
+            document.getElementById('userEmail').textContent = user.email;
+            document.getElementById('userRole').textContent = user.role;
+            document.getElementById('userStatus').textContent = user.actif ? 'Actif' : 'Inactif';
+            
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('userInfo').classList.add('show');
+        }
+
+        // Masquage des informations utilisateur
+        function hideUserInfo() {
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('userInfo').classList.remove('show');
+        }
+
+        // Affichage des alertes
+        function showAlert(message, type) {
+            const alertContainer = document.getElementById('alertContainer');
+            const alertClass = type === 'success' ? 'alert-success' : 'alert-error';
+            
+            alertContainer.innerHTML = `
+                <div class="alert ${alertClass}">
+                    ${message}
+                </div>
+            `;
+            
+            // Suppression automatique après 5 secondes
+            setTimeout(() => {
+                alertContainer.innerHTML = '';
+            }, 5000);
+        }
+
+        // Gestion du formulaire
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const loginBtn = document.getElementById('loginBtn');
+            const loginText = document.getElementById('loginText');
+            const loginLoading = document.getElementById('loginLoading');
+            
+            // État de chargement
+            loginBtn.disabled = true;
+            loginText.style.display = 'none';
+            loginLoading.style.display = 'inline-block';
+            
+            try {
+                const result = await login(email, password);
+                
+                if (result.success) {
+                    console.log('Utilisateur connecté:', result.user);
+                }
+            } finally {
+                // Restauration de l'état du bouton
+                loginBtn.disabled = false;
+                loginText.style.display = 'inline';
+                loginLoading.style.display = 'none';
+            }
+        });
+
+        // Vérification de la connexion existante au chargement
+        window.addEventListener('load', function() {
+            const storedUser = localStorage.getItem('user_info');
+            const token = localStorage.getItem('access_token');
+            
+            if (storedUser && token) {
+                try {
+                    currentUser = JSON.parse(storedUser);
+                    showUserInfo(currentUser);
+                    showAlert('Session restaurée', 'success');
+                } catch (error) {
+                    console.error('Erreur de restauration de session:', error);
+                    logout();
+                }
+            }
+        });
+
+        // Test de connectivité au chargement
+        fetch(`${API_URL}/auth/health`)
+            .then(response => response.json())
+            .then(data => {
+                console.log('✅ Service auth-user-service opérationnel:', data);
+            })
+            .catch(error => {
+                console.error('❌ Service auth-user-service non disponible:', error);
+                showAlert('Service non disponible. Vérifiez que le backend est démarré.', 'error');
+            });
+    </script>
+</body>
+</html>

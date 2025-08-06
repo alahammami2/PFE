@@ -1,0 +1,243 @@
+# Docker Compose pour Gateway Service - SprintBot
+# Point d'entrée unique pour l'écosystème microservices
+
+version: '3.8'
+
+services:
+  # Gateway Service - Point d'entrée unique
+  gateway-service:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      args:
+        - BUILD_DATE=${BUILD_DATE:-$(date -u +'%Y-%m-%dT%H:%M:%SZ')}
+        - VCS_REF=${VCS_REF:-$(git rev-parse --short HEAD)}
+    image: sprintbot/gateway-service:1.0.0
+    container_name: sprintbot-gateway-service
+    hostname: gateway-service
+    restart: unless-stopped
+    
+    # Configuration des ports
+    ports:
+      - "8080:8080"
+    
+    # Variables d'environnement
+    environment:
+      # Configuration Spring
+      SPRING_PROFILES_ACTIVE: docker
+      SERVER_PORT: 8080
+      
+      # Configuration Eureka
+      EUREKA_CLIENT_SERVICE_URL: http://discovery-service:8761/eureka/
+      GATEWAY_INSTANCE_HOSTNAME: gateway-service
+      
+      # Configuration Redis
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_DATABASE: 0
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      
+      # Configuration JWT
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-SprintBot-Gateway-Secret-Key-2024-Very-Long-And-Secure}
+      JWT_EXPIRATION_TIME: ${JWT_EXPIRATION_TIME:-86400000}
+      JWT_REFRESH_EXPIRATION_TIME: ${JWT_REFRESH_EXPIRATION_TIME:-604800000}
+      
+      # Configuration Rate Limiting
+      RATE_LIMIT_REQUESTS_PER_SECOND: ${RATE_LIMIT_REQUESTS_PER_SECOND:-100}
+      RATE_LIMIT_BURST_CAPACITY: ${RATE_LIMIT_BURST_CAPACITY:-200}
+      RATE_LIMIT_REPLENISH_RATE: ${RATE_LIMIT_REPLENISH_RATE:-100}
+      
+      # Configuration des logs
+      LOGGING_LEVEL_GATEWAY: ${LOGGING_LEVEL_GATEWAY:-INFO}
+      LOGGING_LEVEL_GATEWAY_FRAMEWORK: ${LOGGING_LEVEL_GATEWAY_FRAMEWORK:-INFO}
+      LOGGING_LEVEL_SECURITY: ${LOGGING_LEVEL_SECURITY:-WARN}
+      LOGGING_LEVEL_RESILIENCE4J: ${LOGGING_LEVEL_RESILIENCE4J:-INFO}
+      
+      # Configuration JVM
+      JAVA_OPTS: >-
+        -Xms512m 
+        -Xmx1024m 
+        -XX:+UseG1GC 
+        -XX:G1HeapRegionSize=16m 
+        -XX:+UseStringDeduplication
+        -XX:+OptimizeStringConcat
+        -Dfile.encoding=UTF-8
+        -Duser.timezone=Europe/Paris
+    
+    # Volumes pour persistance
+    volumes:
+      - gateway-logs:/app/logs
+      - gateway-config:/app/config
+      - /etc/localtime:/etc/localtime:ro
+    
+    # Configuration réseau
+    networks:
+      - sprintbot-network
+    
+    # Dépendances
+    depends_on:
+      discovery-service:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    
+    # Health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    
+    # Limites de ressources
+    deploy:
+      resources:
+        limits:
+          memory: 1.5G
+          cpus: '1.0'
+        reservations:
+          memory: 512M
+          cpus: '0.5'
+    
+    # Labels pour monitoring et organisation
+    labels:
+      - "com.sprintbot.service=gateway-service"
+      - "com.sprintbot.version=1.0.0"
+      - "com.sprintbot.team=infrastructure"
+      - "com.sprintbot.environment=docker"
+      - "traefik.enable=true"
+      - "traefik.http.routers.gateway.rule=Host(`gateway.sprintbot.local`)"
+      - "traefik.http.services.gateway.loadbalancer.server.port=8080"
+
+  # Redis pour rate limiting et cache
+  redis:
+    image: redis:7.2-alpine
+    container_name: sprintbot-redis
+    hostname: redis
+    restart: unless-stopped
+    
+    # Configuration des ports
+    ports:
+      - "6379:6379"
+    
+    # Commande avec configuration
+    command: >
+      redis-server 
+      --appendonly yes 
+      --appendfsync everysec
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+      --tcp-keepalive 60
+      --timeout 300
+    
+    # Variables d'environnement
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+    
+    # Volumes pour persistance
+    volumes:
+      - redis-data:/data
+      - /etc/localtime:/etc/localtime:ro
+    
+    # Configuration réseau
+    networks:
+      - sprintbot-network
+    
+    # Health check
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    
+    # Limites de ressources
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 128M
+          cpus: '0.1'
+    
+    # Labels
+    labels:
+      - "com.sprintbot.service=redis"
+      - "com.sprintbot.version=7.2"
+      - "com.sprintbot.team=infrastructure"
+      - "com.sprintbot.environment=docker"
+
+  # Discovery Service (référence externe)
+  discovery-service:
+    image: sprintbot/discovery-service:1.0.0
+    container_name: sprintbot-discovery-service
+    hostname: discovery-service
+    restart: unless-stopped
+    
+    # Configuration des ports
+    ports:
+      - "8761:8761"
+    
+    # Variables d'environnement
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SERVER_PORT: 8761
+      EUREKA_INSTANCE_HOSTNAME: discovery-service
+    
+    # Configuration réseau
+    networks:
+      - sprintbot-network
+    
+    # Health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    
+    # Labels
+    labels:
+      - "com.sprintbot.service=discovery-service"
+      - "com.sprintbot.version=1.0.0"
+      - "com.sprintbot.team=infrastructure"
+      - "com.sprintbot.environment=docker"
+
+# Configuration des réseaux
+networks:
+  sprintbot-network:
+    name: sprintbot-network
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.20.0.0/16
+    labels:
+      - "com.sprintbot.network=main"
+      - "com.sprintbot.environment=docker"
+
+# Configuration des volumes
+volumes:
+  # Volumes pour Gateway Service
+  gateway-logs:
+    name: sprintbot-gateway-logs
+    driver: local
+    labels:
+      - "com.sprintbot.service=gateway-service"
+      - "com.sprintbot.type=logs"
+  
+  gateway-config:
+    name: sprintbot-gateway-config
+    driver: local
+    labels:
+      - "com.sprintbot.service=gateway-service"
+      - "com.sprintbot.type=config"
+  
+  # Volume pour Redis
+  redis-data:
+    name: sprintbot-redis-data
+    driver: local
+    labels:
+      - "com.sprintbot.service=redis"
+      - "com.sprintbot.type=data"

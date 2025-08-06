@@ -1,0 +1,134 @@
+# Docker Compose pour Discovery Service (Eureka Server)
+# SprintBot - Service de découverte pour l'écosystème microservices
+
+version: '3.8'
+
+services:
+  # Discovery Service (Eureka Server)
+  discovery-service:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      args:
+        - BUILD_DATE=${BUILD_DATE:-$(date -u +'%Y-%m-%dT%H:%M:%SZ')}
+        - VCS_REF=${VCS_REF:-$(git rev-parse --short HEAD)}
+    image: sprintbot/discovery-service:latest
+    container_name: sprintbot-discovery-service
+    hostname: discovery-service
+    
+    # Configuration des ports
+    ports:
+      - "8761:8761"
+    
+    # Variables d'environnement
+    environment:
+      # Configuration Spring
+      SPRING_PROFILES_ACTIVE: docker
+      SERVER_PORT: 8761
+      
+      # Configuration Eureka
+      EUREKA_INSTANCE_HOSTNAME: discovery-service
+      EUREKA_CLIENT_REGISTER_WITH_EUREKA: false
+      EUREKA_CLIENT_FETCH_REGISTRY: false
+      EUREKA_CLIENT_SERVICE_URL: http://discovery-service:8761/eureka/
+      EUREKA_SERVER_ENABLE_SELF_PRESERVATION: true
+      EUREKA_SERVER_EVICTION_INTERVAL: 60000
+      EUREKA_SERVER_RENEWAL_THRESHOLD: 0.85
+      
+      # Configuration du dashboard
+      EUREKA_DASHBOARD_ENABLED: true
+      EUREKA_DASHBOARD_USERNAME: admin
+      EUREKA_DASHBOARD_PASSWORD: admin123
+      
+      # Configuration JVM
+      JAVA_OPTS: >-
+        -Xms512m 
+        -Xmx1024m 
+        -XX:+UseG1GC 
+        -XX:+UseContainerSupport
+        -XX:MaxRAMPercentage=75.0
+        -XX:+HeapDumpOnOutOfMemoryError
+        -XX:HeapDumpPath=/app/logs/
+        -Djava.security.egd=file:/dev/./urandom
+      
+      # Configuration du monitoring
+      MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: health,info,metrics,env,prometheus
+      MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS: always
+      MANAGEMENT_METRICS_EXPORT_PROMETHEUS_ENABLED: true
+      
+      # Configuration des logs
+      LOGGING_LEVEL_ROOT: INFO
+      LOGGING_LEVEL_SPRINTBOT: INFO
+      LOGGING_LEVEL_EUREKA: INFO
+      LOGGING_FILE_NAME: /app/logs/discovery-service.log
+      
+      # Configuration de sécurité
+      SPRING_SECURITY_USER_NAME: admin
+      SPRING_SECURITY_USER_PASSWORD: admin123
+      SPRING_SECURITY_USER_ROLES: ADMIN
+    
+    # Volumes pour la persistance
+    volumes:
+      - discovery_logs:/app/logs
+      - discovery_config:/app/config
+      - /etc/localtime:/etc/localtime:ro
+    
+    # Configuration réseau
+    networks:
+      - sprintbot-network
+    
+    # Health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    
+    # Politique de redémarrage
+    restart: unless-stopped
+    
+    # Limites de ressources
+    deploy:
+      resources:
+        limits:
+          memory: 1.5G
+          cpus: '1.0'
+        reservations:
+          memory: 512M
+          cpus: '0.5'
+    
+    # Labels pour l'organisation
+    labels:
+      - "com.sprintbot.service=discovery-service"
+      - "com.sprintbot.component=infrastructure"
+      - "com.sprintbot.version=1.0.0"
+      - "com.sprintbot.description=Service de découverte Eureka"
+      - "traefik.enable=true"
+      - "traefik.http.routers.discovery.rule=Host(`discovery.sprintbot.local`)"
+      - "traefik.http.services.discovery.loadbalancer.server.port=8761"
+
+# Configuration des volumes
+volumes:
+  discovery_logs:
+    driver: local
+    labels:
+      - "com.sprintbot.volume=discovery-logs"
+      - "com.sprintbot.description=Logs du Discovery Service"
+  
+  discovery_config:
+    driver: local
+    labels:
+      - "com.sprintbot.volume=discovery-config"
+      - "com.sprintbot.description=Configuration du Discovery Service"
+
+# Configuration des réseaux
+networks:
+  sprintbot-network:
+    driver: bridge
+    labels:
+      - "com.sprintbot.network=main"
+      - "com.sprintbot.description=Réseau principal SprintBot"
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
